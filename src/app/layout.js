@@ -3,7 +3,7 @@ import "./globals.css";
 import Header from "@/components/header.js";
 
 export const metadata = {
-  title: "Tienda Online de Electricidad e Iluminación | Electrodel",
+  title: "Electricidad e Iluminación | Electrodel",
   description:
     "Descubrí productos de electricidad e iluminación para tu hogar o negocio. En Electrodel encontrás calidad, buenos precios y atención personalizada.",
   icons: {
@@ -11,17 +11,17 @@ export const metadata = {
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
-    title: "Tienda Online de Electricidad e Iluminación | Electrodel",
+    title: "Electricidad e Iluminación | Electrodel",
     description:
       "Descubrí productos de electricidad e iluminación para tu hogar o negocio. En Electrodel encontrás calidad, buenos precios y atención personalizada.",
-    url: "https://eletrodel.com.ar",
-    siteName: "Eletrodel",
+    url: "https://electrodel.com.ar",
+    siteName: "Electrodel",
     images: [
       {
-        url: "https://eletrodel.com.ar/logo.jpg",
+        url: "https://electrodel.com.ar/logo.jpg",
         width: 1200,
         height: 630,
-        alt: "Logo de Eletrodel",
+        alt: "Logo de Electrodel",
       },
     ],
     locale: "es_AR",
@@ -29,10 +29,10 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tienda Online de Electricidad e Iluminación | Electrodel",
+    title: "Electricidad e Iluminación | Electrodel",
     description:
       "Descubrí productos de electricidad e iluminación para tu hogar o negocio. En Electrodel encontrás calidad, buenos precios y atención personalizada.",
-    images: ["https://eletrodel.com.ar/logo.jpg"],
+    images: ["https://electrodel.com.ar/logo.jpg"],
   },
 };
 
