@@ -1,0 +1,13 @@
+.main {
+  width: calc(100% - 17rem);
+  padding: 0;
+  padding-left: 1rem;
+}
+@media (max-width: 900px) {
+  .main {
+    max-width: unset;
+    width: 100%;
+    height: calc(100svh - 5rem);
+    padding: 0;
+  }
+}

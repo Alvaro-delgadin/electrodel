@@ -1,0 +1,31 @@
+.main {
+  width: calc(100% - 17rem);
+  padding: 0;
+  padding-left: 1rem;
+}
+.imgContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 5rem;
+  border-radius: 0.4rem;
+  overflow: hidden;
+  background-color: white;
+  padding: 0.5rem;
+}
+.img {
+  height: 100%;
+}
+@media (max-width: 900px) {
+  .main {
+    max-width: unset;
+    width: 100%;
+    height: calc(100vh - 5rem);
+    padding: 0;
+  }
+  .title {
+    margin-top: 1rem;
+    margin-left: 1rem;
+  }
+}

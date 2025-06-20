@@ -1,4 +1,4 @@
-import styles from "@/styles/header.module.css";
+import styles from "@/styles/client/header.module.css";
 
 const logoUrl =
   "https://pbmvrjvjhablmelovyoc.supabase.co/storage/v1/object/public/assets//logo%20transparent.webp";

@@ -18,6 +18,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1rem;
+  min-height: 25rem;
+}
 * {
   box-sizing: border-box;
   padding: 0;
