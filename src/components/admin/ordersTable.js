@@ -312,7 +312,6 @@ export default function OrdersTable() {
 
   const handleSaveNewRow = async (row) => {
     setError(false);
-    const id = row.id;
     const requiredFields = Object.entries(headerColumnsConfig)
       .filter(([_, config]) => config.nullable === false)
       .map(([key]) => key);
@@ -361,7 +360,6 @@ export default function OrdersTable() {
     requestLock.current = true;
     try {
       setSync("Subiendo nuevo pedido");
-      apiRef.current.updateRows([{ id, _action: "delete" }]);
       const { id, isNew, created_at, ...newProduct } = row;
 
       const { error, data } = await supabase
@@ -370,11 +368,12 @@ export default function OrdersTable() {
         .select();
 
       if (error) throw error;
+      apiRef.current.updateRows([{ id: row.id, _action: "delete" }]);
 
       const insertedRow = data?.[0];
       if (!insertedRow) throw new Error("No se pudo obtener el pedido creado");
     } catch (err) {
-      setError("Hubo un error al guardar el pedido");
+      setError("Hubo un error al guardar el pedido: " + err.message);
     } finally {
       setSync(false);
       requestLock.current = false;

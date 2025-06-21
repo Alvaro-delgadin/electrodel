@@ -49,9 +49,7 @@ export default function Dashboard() {
         .from("orders")
         .select("*", { count: "exact", head: true })
         .eq("status", "pending")
-        .eq("active", true)
-        .gte("created_at", startUTC)
-        .lte("created_at", endUTC),
+        .eq("active", true),
 
       supabase
         .from("orders")

@@ -439,7 +439,6 @@ export default function ProductsTable() {
       setSelectedRowModal((prev) => {
         return { ...prev, images: updated };
       });
-      apiRef.current.updateRows([{ id: selectedRowModal.id, images: updated }]);
 
       e.target.value = "";
 
@@ -454,11 +453,24 @@ export default function ProductsTable() {
     setSync("Eliminando imagen");
     const updated = [...(selectedRowModal.images || [])];
     updated.splice(index, 1); // elimina la imagen
+
     apiRef.current.updateRows([{ id: selectedRowModal.id, images: updated }]);
     setSelectedRowModal((prev) => {
       return { ...prev, images: updated };
     });
+
     try {
+      if (selectedRowModal.isNew) {
+        return;
+      }
+      const hasBlob = selectedRowModal.images.filter((img) =>
+        img.includes("blob")
+      );
+      console.log(hasBlob);
+
+      if (hasBlob?.length) {
+        throw Error("url con Blob");
+      }
       const { updateError } = await supabase
         .from("products")
         .update({ images: updated })
@@ -471,8 +483,10 @@ export default function ProductsTable() {
       requestLock.current = false;
     }
   };
+
   const uploadImage = async (file, index) => {
-    if (!file || !index) return;
+    if (!file || index === undefined || index === null) return;
+
     if (requestLock.current) return;
     requestLock.current = true;
     setSync("Subiendo imagen");
@@ -495,19 +509,25 @@ export default function ProductsTable() {
       if (bucketError) {
         throw new Error("Error al buscar la imagen: " + bucketError.message);
       }
-      const updatedImages = [...selectedRowModal.images];
-      updatedImages[index] = publicUrl;
+      const updated = [...selectedRowModal.images];
+      updated[index] = publicUrl;
+      apiRef.current.updateRows([{ id: selectedRowModal.id, images: updated }]);
+      setSelectedRowModal((prev) => {
+        return { ...prev, images: updated };
+      });
+      if (selectedRowModal.isNew) {
+        return;
+      }
       setSync("Actualizando Base de datos");
-      const { updateError } = await supabase
+      const { response, updateError } = await supabase
         .from("products")
-        .update({ images: updatedImages })
+        .update({ images: updated })
         .eq("id", selectedRowModal.id);
+
       if (updateError) {
         throw new Error(
           "Error al actualizar la imagen: " + updateError.message
         );
-        setSync(false);
-        return;
       }
     } catch (err) {
       setError(err);
