@@ -1,12 +1,20 @@
-import styles from "./page.module.css";
-export default function Home() {
+import { createClient } from "@/lib/supabaseServer";
+import { Typography } from "@mui/material";
+import ProductList from "@/components/client/ProductList";
+
+export default async function Home() {
+  const supabase = await createClient();
+  const { data: products } = await supabase
+    .from("products")
+    .select("*")
+    .eq("active", true);
+
   return (
     <main>
-      <h1 className={styles.title}>Sitio en construcción</h1>
-      <p className={styles.text}>
-        Estamos trabajando para traerte algo{" "}
-        <span className={styles.highlight}>increíble</span>.
-      </p>
+      <Typography component="h1" variant="h4">
+        Productos destacados
+      </Typography>
+      <ProductList products={products} />
     </main>
   );
 }

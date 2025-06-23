@@ -1,8 +1,9 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { DataGrid, useGridApiRef } from "@mui/x-data-grid";
+import { DataGrid, GridActionsCellItem, useGridApiRef } from "@mui/x-data-grid";
 import { esES } from "@mui/x-data-grid/locales";
+import { v4 as uuidv4 } from "uuid";
 import {
   Button,
   createTheme,
@@ -22,6 +23,7 @@ import {
   Image,
   Upload,
   Close,
+  ContentCopy,
 } from "@mui/icons-material";
 const customTheme = createTheme({
   palette: {
@@ -90,6 +92,7 @@ export default function ProductsTable() {
       headerName: "Producto",
       type: "text",
       nullable: false,
+      width: 400,
     },
     price: { headerName: "Precio", type: "text", nullable: true },
     discount: {
@@ -97,11 +100,32 @@ export default function ProductsTable() {
       type: "number",
       nullable: true,
     },
-    stock: { headerName: "Stock", type: "number", nullable: false },
+    stock: {
+      headerName: "Stock",
+      type: "number",
+      nullable: false,
+      align: "left",
+      headerAlign: "left",
+    },
     active: { headerName: "Activo", type: "boolean", nullable: true },
     category: { headerName: "Categoría", type: "text", nullable: true },
-    watts: { headerName: "Potencia (W)", type: "number", nullable: false },
-    color: { headerName: "Color", type: "text", nullable: false },
+    watts: {
+      headerName: "Potencia (W)",
+      type: "number",
+      nullable: false,
+      align: "left",
+      headerAlign: "left",
+    },
+    color: {
+      headerName: "Color",
+      type: "singleSelect",
+      nullable: false,
+      width: "150",
+      valueOptions: [
+        { value: "Cálido", label: "🟠 Cálido" },
+        { value: "Frío", label: "🔵 Frío" },
+      ],
+    },
     images: { headerName: "Imágenes", type: "text", nullable: true },
     created_at: {
       headerName: "Fecha de creación",
@@ -116,36 +140,40 @@ export default function ProductsTable() {
   const headerSpecialColumnsConfig = [
     {
       field: "actions",
-      headerName: "",
+      headerName: "Acciones",
       width: 100,
-      renderCell: (params) =>
-        params?.row?.isNew ? (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-              height: "100%",
-            }}
-          >
-            <Button
-              onClick={() => handleSaveNewRow(params.row)}
-              style={{ cursor: "pointer" }}
-            >
-              <Save fontSize="small" />
-            </Button>
-            <Button
-              style={{
-                color: "var(--primary)",
-                cursor: "pointer",
-              }}
-              onClick={() => handleCancelNewRow(params.row.id)}
-            >
-              <Cancel fontSize="small" />
-            </Button>
-          </div>
-        ) : null,
+      type: "actions",
+      getActions: ({ id, row }) => {
+        if (row.isNew) {
+          return [
+            <Tooltip title="Guardar">
+              <GridActionsCellItem
+                icon={<Save />}
+                label="Guardar"
+                onClick={() => {
+                  handleSaveNewRow(row);
+                }}
+              />
+            </Tooltip>,
+            <Tooltip title="Cancelar">
+              <GridActionsCellItem
+                icon={<Cancel />}
+                label="Cancelar"
+                onClick={() => handleCancelNewRow(id)}
+              />
+            </Tooltip>,
+          ];
+        }
+        return [
+          <Tooltip title="Duplicar">
+            <GridActionsCellItem
+              icon={<ContentCopy />}
+              label="Duplicar"
+              onClick={() => handleAddRow(row)}
+            />
+          </Tooltip>,
+        ];
+      },
       sortable: false,
       filterable: false,
     },
@@ -157,16 +185,12 @@ export default function ProductsTable() {
         field: prop,
         headerName: key.headerName,
         type: key.type,
+        width: key.width,
+        valueOptions: key.valueOptions,
       };
 
       if (!["images", "id"].includes(prop)) {
         column.editable = true;
-      }
-      if (prop === "product") {
-        column.width = 400;
-      }
-      if (["discount", "stock"].includes(prop)) {
-        column.type = "number";
       }
       if ("price" === prop) {
         column.renderCell = (params) => {
@@ -231,7 +255,7 @@ export default function ProductsTable() {
     }
   );
   const columns = headerSpecialColumnsConfig?.length
-    ? [...definedColumns, ...headerSpecialColumnsConfig]
+    ? [...headerSpecialColumnsConfig, ...definedColumns]
     : definedColumns;
 
   useEffect(() => {
@@ -251,6 +275,34 @@ export default function ProductsTable() {
     fetchData();
   }, []);
 
+  const handleAddRow = (row) => {
+    const id = `new-${uuidv4()}`;
+
+    const newRow = {
+      id,
+      isNew: true,
+      product: row?.product || "",
+      category: row?.category || "",
+      images: row?.images || "",
+    };
+
+    Object.entries(headerColumnsConfig).forEach(([key, config]) => {
+      if (key === "id") return;
+
+      if (newRow[key] === undefined) {
+        newRow[key] =
+          "default" in config
+            ? config.default
+            : config.type === "number"
+            ? 0
+            : config.type === "boolean"
+            ? true
+            : "";
+      }
+    });
+
+    apiRef.current?.updateRows([newRow]);
+  };
   const processRowUpdate = async (newRow, oldRow) => {
     setError(null);
     if (requestLock.current) return;
@@ -587,6 +639,7 @@ export default function ProductsTable() {
               columns,
               headerColumnsConfig,
               requestLock,
+              handleAddRow,
             },
           }}
         />

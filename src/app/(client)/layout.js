@@ -1,6 +1,8 @@
 import "@/styles/client/globals.css";
-import Header from "@/components/client/header.js";
-
+import Header from "@/components/client/Header.js";
+import ThemeRegistry from "@/components/client/ThemeRegistry";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
+import { createClient } from "@/lib/supabaseServer";
 export const metadata = {
   title: "Electricidad e Iluminación | Electrodel",
   description:
@@ -35,11 +37,18 @@ export const metadata = {
   },
 };
 
-export default function ClientLayout({ children }) {
+export default async function ClientLayout({ children }) {
+  const supabase = await createClient();
+  const {
+    data: { logo },
+  } = await supabase.from("settings").select("*").single();
+
   return (
-    <>
-      <Header />
-      {children}
-    </>
+    <AppRouterCacheProvider>
+      <ThemeRegistry>
+        <Header logo={logo} />
+        {children}
+      </ThemeRegistry>
+    </AppRouterCacheProvider>
   );
 }

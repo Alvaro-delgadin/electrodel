@@ -3,7 +3,14 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { DataGrid, GridActionsCellItem, useGridApiRef } from "@mui/x-data-grid";
 import { esES } from "@mui/x-data-grid/locales";
-import { createTheme, ThemeProvider, Select, MenuItem } from "@mui/material";
+import {
+  createTheme,
+  ThemeProvider,
+  Select,
+  MenuItem,
+  Toolbar,
+  Tooltip,
+} from "@mui/material";
 import customToolbar from "@/components/admin/ordersToolbar.js";
 import { Save, Cancel, Delete } from "@mui/icons-material";
 const customTheme = createTheme({
@@ -147,28 +154,36 @@ export default function OrdersTable() {
       getActions: ({ id, row }) => {
         if (row.isNew) {
           return [
-            <GridActionsCellItem
-              icon={<Save />}
-              label="Guardar"
-              onClick={() => {
-                handleSaveNewRow(row);
-              }}
-            />,
-            <GridActionsCellItem
-              icon={<Cancel />}
-              label="Cancelar"
-              onClick={() => handleCancelNewRow(id)}
-            />,
+            <Tooltip title="Guardar">
+              <GridActionsCellItem
+                icon={<Save />}
+                label="Guardar"
+                onClick={() => {
+                  handleSaveNewRow(row);
+                }}
+              />
+            </Tooltip>,
+            <Tooltip title="Cancelar">
+              <GridActionsCellItem
+                icon={<Cancel />}
+                label="Cancelar"
+                onClick={() => handleCancelNewRow(id)}
+              />
+            </Tooltip>,
           ];
         }
         return [
-          <GridActionsCellItem
-            icon={<Delete />}
-            label="Eliminar"
-            onClick={() => handleDeleteRow(id)}
-          />,
+          <Tooltip title="Eliminar">
+            <GridActionsCellItem
+              icon={<Delete />}
+              label="Eliminar"
+              onClick={() => handleDeleteRow(id)}
+            />
+          </Tooltip>,
         ];
       },
+      sortable: false,
+      filterable: false,
     },
   ];
   const definedColumns = Object.entries(headerColumnsConfig).map(

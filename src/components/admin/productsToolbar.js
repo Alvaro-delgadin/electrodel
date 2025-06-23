@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import { styled } from "@mui/material/styles";
 import { supabase } from "@/lib/supabaseClient";
-import { v4 as uuidv4 } from "uuid";
 import {
   Toolbar,
   ToolbarButton,
@@ -13,7 +12,6 @@ import {
   QuickFilterControl,
   QuickFilterClear,
   QuickFilterTrigger,
-  GridRowModes,
 } from "@mui/x-data-grid";
 import {
   Typography,
@@ -77,6 +75,7 @@ export default function customToolbar({
   columns,
   headerColumnsConfig,
   requestLock,
+  handleAddRow,
 }) {
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const exportMenuTriggerRef = useRef(null);
@@ -84,29 +83,6 @@ export default function customToolbar({
   const importMenuTriggerRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  const handleAddRow = () => {
-    const id = `new-${uuidv4()}`;
-
-    const newRow = {
-      id,
-      isNew: true,
-    };
-
-    Object.entries(headerColumnsConfig).forEach(([key, config]) => {
-      if (key === "id") return;
-
-      newRow[key] =
-        "default" in config
-          ? config.default
-          : config.type === "number"
-          ? 0
-          : config.type === "boolean"
-          ? true
-          : "";
-    });
-
-    apiRef.current?.updateRows([newRow]);
-  };
   const handleActive = async (value) => {
     if (requestLock.current) return;
     requestLock.current = true;
