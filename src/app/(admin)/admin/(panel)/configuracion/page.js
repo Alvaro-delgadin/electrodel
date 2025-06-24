@@ -12,6 +12,7 @@ export default function Settings() {
   const [logoFile, setLogoFile] = useState(undefined);
   const [whatsapp, setWhatsapp] = useState("");
   const [location, setLocation] = useState("");
+  const [schedule, setSchedule] = useState("");
   const [data, setData] = useState(undefined);
   const rowId = "45645c26-d123-42a1-aa25-9d5a0bf52f33";
   const dataUpdatingRef = useRef(false);
@@ -28,6 +29,7 @@ export default function Settings() {
         setLogoPath(data.logo);
         setWhatsapp(data.whatsapp);
         setLocation(data.location);
+        setSchedule(data.schedule);
         setLoading(false);
       } else {
         setError(error.code);
@@ -46,7 +48,7 @@ export default function Settings() {
   }, [data]);
 
   const handleSubmit = async () => {
-    if (!logoFile && data.whatsapp === whatsapp && data.location === location) {
+    if (dataUpdatingRef.current) {
       return;
     }
 
@@ -118,6 +120,23 @@ export default function Settings() {
       }
       setData((prev) => ({ ...prev, location: location }));
     }
+    console.log(schedule);
+
+    if (data.schedule !== schedule) {
+      setSync("Actualizando horario");
+      const { error: updateError } = await supabase
+        .from("settings")
+        .update({ schedule: schedule })
+        .eq("id", rowId);
+
+      if (updateError) {
+        setSync(false);
+        setError("Error al actualizar el horario" + updateError.code);
+        dataUpdatingRef.current = false;
+        return;
+      }
+      setData((prev) => ({ ...prev, schedule: schedule }));
+    }
     setSync(false);
     dataUpdatingRef.current = false;
   };
@@ -144,7 +163,7 @@ export default function Settings() {
           loading ? "skeleton" : ""
         }`}
       >
-        <img src={logoPath} className={styles.logo} />
+        <img src={logoPath} className={styles.logo} alt="" />
         <input
           onChange={handleFileChange}
           type="file"
@@ -158,6 +177,11 @@ export default function Settings() {
         <input
           id="whatsapp"
           onChange={(e) => setWhatsapp(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleSubmit(e.target.value);
+            }
+          }}
           value={whatsapp}
           type="text"
           className={styles.inputText}
@@ -169,7 +193,28 @@ export default function Settings() {
         <input
           id="location"
           onChange={(e) => setLocation(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleSubmit(e.target.value);
+            }
+          }}
           value={location}
+          className={styles.inputText}
+          type="text"
+          disabled={loading}
+        />
+      </div>
+      <h2 className={styles.inputTitle}>Horario</h2>
+      <div className={loading ? "skeleton" : ""}>
+        <input
+          id="schedule"
+          onChange={(e) => setSchedule(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleSubmit(e.target.value);
+            }
+          }}
+          value={schedule}
           className={styles.inputText}
           type="text"
           disabled={loading}

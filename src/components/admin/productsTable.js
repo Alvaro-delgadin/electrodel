@@ -19,62 +19,62 @@ import customToolbar from "@/components/admin/productsToolbar.js";
 import {
   Save,
   Cancel,
-  Highlight,
   Image,
   Upload,
   Close,
   ContentCopy,
 } from "@mui/icons-material";
-const customTheme = createTheme({
-  palette: {
-    mode: "dark",
-    primary: {
-      main: "#ec3237",
-    },
-    background: {
-      default: "#202020",
-    },
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          "&": {
-            minWidth: "2.5rem",
-            minHeight: "2.5rem",
-            borderRadius: 30,
-            color: "var(--font)",
-          },
-          "&:hover": {
-            backgroundColor: "var(--background)", // hover global para botones
-          },
-        },
-      },
-    },
-    MuiDataGrid: {
-      styleOverrides: {
-        cell: {
-          "&.MuiDataGrid-cell--editing": {
-            backgroundColor: "var(--background)",
-          },
-        },
-        row: {
-          "&:hover": {
-            backgroundColor: "var(--background-secondary)",
-          },
-          "&.noHover:hover": {
-            backgroundColor: "transparent", // ← anula hover solo si tiene esta clase
-          },
-          "&.inactiveProduct": {
-            color: "gray",
-          },
-        },
-      },
-    },
-  },
-  esES,
-});
+import { createActions } from "@/lib/crud/crud";
 
+export const categories = [
+  {
+    category: "Iluminación interior",
+    subcategories: [
+      "Lámparas de techo",
+      "Apliques",
+      "Spots y empotrables",
+      "Plafones",
+      "Lámparas de pie o mesa",
+    ],
+  },
+  {
+    category: "Iluminación exterior",
+    subcategories: [
+      "Reflectores",
+      "Faroles y apliques",
+      "Tiras LED",
+      "Proyectores solares",
+    ],
+  },
+  {
+    category: "Bombillas y lámparas",
+    subcategories: [
+      "LED estándar",
+      "Filamento decorativo",
+      "Dicroicas / GU10",
+      "Tubo LED",
+    ],
+  },
+  {
+    category: "Electricidad",
+    subcategories: [
+      "Térmicas y disyuntores",
+      "Cables y conductores",
+      "Tomas y llaves",
+      "Cajas y canaletas",
+      "Zócalos y portalámparas",
+    ],
+  },
+  {
+    category: "Accesorios",
+    subcategories: [
+      "Sensores de movimiento",
+      "Controladores y dimmers",
+      "Fichas y adaptadores",
+      "Herramientas y consumibles",
+    ],
+  },
+];
 export default function ProductsTable() {
   const [loading, setLoading] = useState(true);
   const [sync, setSync] = useState(false);
@@ -86,177 +86,6 @@ export default function ProductsTable() {
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedRowModal, setSelectedRowModal] = useState(null);
   const fileInputRef = useRef(null);
-
-  const headerColumnsConfig = {
-    product: {
-      headerName: "Producto",
-      type: "text",
-      nullable: false,
-      width: 400,
-    },
-    price: { headerName: "Precio", type: "text", nullable: true },
-    discount: {
-      headerName: "Descuento (%)",
-      type: "number",
-      nullable: true,
-    },
-    stock: {
-      headerName: "Stock",
-      type: "number",
-      nullable: false,
-      align: "left",
-      headerAlign: "left",
-    },
-    active: { headerName: "Activo", type: "boolean", nullable: true },
-    category: { headerName: "Categoría", type: "text", nullable: true },
-    watts: {
-      headerName: "Potencia (W)",
-      type: "number",
-      nullable: false,
-      align: "left",
-      headerAlign: "left",
-    },
-    color: {
-      headerName: "Color",
-      type: "singleSelect",
-      nullable: false,
-      width: "150",
-      valueOptions: [
-        { value: "Cálido", label: "🟠 Cálido" },
-        { value: "Frío", label: "🔵 Frío" },
-      ],
-    },
-    images: { headerName: "Imágenes", type: "text", nullable: true },
-    created_at: {
-      headerName: "Fecha de creación",
-      type: "text",
-      nullable: true,
-      default: new Date().toISOString(),
-      sortable: true,
-    },
-    id: { headerName: "id", type: "text", nullable: true },
-  };
-
-  const headerSpecialColumnsConfig = [
-    {
-      field: "actions",
-      headerName: "Acciones",
-      width: 100,
-      type: "actions",
-      getActions: ({ id, row }) => {
-        if (row.isNew) {
-          return [
-            <Tooltip title="Guardar">
-              <GridActionsCellItem
-                icon={<Save />}
-                label="Guardar"
-                onClick={() => {
-                  handleSaveNewRow(row);
-                }}
-              />
-            </Tooltip>,
-            <Tooltip title="Cancelar">
-              <GridActionsCellItem
-                icon={<Cancel />}
-                label="Cancelar"
-                onClick={() => handleCancelNewRow(id)}
-              />
-            </Tooltip>,
-          ];
-        }
-        return [
-          <Tooltip title="Duplicar">
-            <GridActionsCellItem
-              icon={<ContentCopy />}
-              label="Duplicar"
-              onClick={() => handleAddRow(row)}
-            />
-          </Tooltip>,
-        ];
-      },
-      sortable: false,
-      filterable: false,
-    },
-  ];
-
-  const definedColumns = Object.entries(headerColumnsConfig).map(
-    ([prop, key]) => {
-      let column = {
-        field: prop,
-        headerName: key.headerName,
-        type: key.type,
-        width: key.width,
-        valueOptions: key.valueOptions,
-      };
-
-      if (!["images", "id"].includes(prop)) {
-        column.editable = true;
-      }
-      if ("price" === prop) {
-        column.renderCell = (params) => {
-          const value = Number(params.value);
-          return isNaN(value)
-            ? params.value
-            : value.toLocaleString("es-AR", {
-                style: "currency",
-                currency: "ARS",
-                minimumFractionDigits: 0,
-              });
-        };
-      }
-      if (prop === "images") {
-        column.renderCell = (params) => {
-          const images = params.value || [];
-          const firstImage = images[0];
-
-          return firstImage ? (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%",
-                maxWidth: "5rem",
-                height: "100%",
-                backgroundColor: "var(--background-secondary)",
-                borderRadius: "0.5rem",
-                cursor: "pointer",
-              }}
-              onClick={() => handleOpenImageModal(params.row)}
-            >
-              <img
-                src={firstImage}
-                alt="producto"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "contain",
-                  borderRadius: 4,
-                }}
-              />
-            </div>
-          ) : (
-            <Button
-              style={{ minWidth: "100%", minHeight: "100%" }}
-              onClick={() => handleOpenImageModal(params.row)}
-            >
-              <Highlight
-                sx={{
-                  margin: "auto",
-                  fontSize: 20,
-                  cursor: "pointer",
-                }}
-              />
-            </Button>
-          );
-        };
-      }
-      return column;
-    }
-  );
-  const columns = headerSpecialColumnsConfig?.length
-    ? [...headerSpecialColumnsConfig, ...definedColumns]
-    : definedColumns;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -275,192 +104,245 @@ export default function ProductsTable() {
     fetchData();
   }, []);
 
-  const handleAddRow = (row) => {
-    const id = `new-${uuidv4()}`;
+  const columns = [
+    {
+      field: "actions",
+      headerName: "Acciones",
+      width: 100,
+      type: "actions",
+      getActions: ({ id, row }) => {
+        if (row.isNew) {
+          return [
+            <Tooltip title="Guardar">
+              <GridActionsCellItem
+                icon={<Save />}
+                label="Guardar"
+                onClick={() => {
+                  action.saveNewRow(row);
+                }}
+              />
+            </Tooltip>,
+            <Tooltip title="Cancelar">
+              <GridActionsCellItem
+                icon={<Cancel />}
+                label="Cancelar"
+                onClick={() => action.cancelNewRow(id)}
+              />
+            </Tooltip>,
+          ];
+        }
+        return [
+          <Tooltip title="Duplicar">
+            <GridActionsCellItem
+              icon={<ContentCopy />}
+              label="Duplicar"
+              onClick={() => action.addRow(row)}
+            />
+          </Tooltip>,
+        ];
+      },
+      sortable: false,
+      filterable: false,
+    },
+    {
+      field: "product",
+      headerName: "Producto",
+      type: "text",
+      nullable: false,
+      width: 400,
+      editable: true,
+    },
+    {
+      field: "price",
+      headerName: "Precio",
+      type: "number",
+      nullable: true,
+      editable: true,
+      align: "left",
+      headerAlign: "left",
+      renderCell: (params) => {
+        const value = Number(params.value);
+        return isNaN(value)
+          ? params.value
+          : value.toLocaleString("es-AR", {
+              style: "currency",
+              currency: "ARS",
+              minimumFractionDigits: 0,
+            });
+      },
+    },
+    {
+      field: "discount",
+      headerName: "Descuento (%)",
+      type: "number",
+      nullable: true,
+      editable: true,
+      align: "left",
+      headerAlign: "left",
+    },
+    {
+      field: "stock",
+      headerName: "Stock",
+      type: "number",
+      nullable: false,
+      align: "left",
+      headerAlign: "left",
+      editable: true,
+    },
+    {
+      field: "active",
+      headerName: "Activo",
+      type: "boolean",
+      nullable: true,
+      editable: true,
+    },
+    {
+      field: "category",
+      headerName: "Categoría",
+      type: "singleSelect",
+      width: 250,
+      valueOptions: categories.map((c) => c.category),
+      nullable: true,
+      editable: true,
+    },
+    {
+      field: "subcategory",
+      headerName: "Subcategoría",
+      type: "singleSelect",
+      width: 250,
+      editable: true,
+      nullable: true,
+      // Devuelve las subcategorías válidas según la categoría seleccionada
+      valueOptions: (params) => {
+        const selectedCategory = params?.row?.category;
+        const cat = categories.find((c) => c.category === selectedCategory);
+        return cat ? cat.subcategories : [];
+      },
+      // Formatea el valor que se muestra en la celda (lectura)
+      valueFormatter: (params) => {
+        if (!params?.value || !params?.row?.category) return "";
 
-    const newRow = {
-      id,
-      isNew: true,
-      product: row?.product || "",
-      category: row?.category || "",
-      images: row?.images || "",
-    };
+        const cat = categories.find((c) => c.category === params.row.category);
+        const validSubs = cat ? cat.subcategories : [];
 
-    Object.entries(headerColumnsConfig).forEach(([key, config]) => {
-      if (key === "id") return;
+        return validSubs.includes(params.value) ? params.value : "";
+      },
 
-      if (newRow[key] === undefined) {
-        newRow[key] =
-          "default" in config
-            ? config.default
-            : config.type === "number"
-            ? 0
-            : config.type === "boolean"
-            ? true
-            : "";
-      }
-    });
+      // Renderiza la celda manualmente por si querés más control visual
+      renderCell: (params) => {
+        const selectedCategory = params?.row?.category;
+        const cat = categories.find((c) => c.category === selectedCategory);
+        const validSubs = cat ? cat.subcategories : [];
+        const value = validSubs.includes(params.value) ? params.value : "";
+        return <span>{value}</span>;
+      },
+    },
+    {
+      field: "watts",
+      headerName: "Potencia (W)",
+      type: "number",
+      nullable: false,
+      align: "left",
+      headerAlign: "left",
+      editable: true,
+    },
+    {
+      field: "color",
+      headerName: "Color",
+      type: "singleSelect",
+      nullable: false,
+      width: "150",
+      editable: true,
+      valueOptions: [
+        { value: "Cálido", label: "🟠 Cálido" },
+        { value: "Frío", label: "🔵 Frío" },
+      ],
+    },
+    {
+      field: "images",
+      headerName: "Imágenes",
+      type: "text",
+      nullable: true,
+      editable: false,
+      renderCell: (params) => {
+        const images = params.value || [];
+        const firstImage = images[0];
 
-    apiRef.current?.updateRows([newRow]);
-  };
-  const processRowUpdate = async (newRow, oldRow) => {
-    setError(null);
-    if (requestLock.current) return;
-    if (newRow.isNew) {
-      return { ...newRow };
-    }
-
-    try {
-      setSync(true);
-      requestLock.current = true;
-
-      const changedField = Object.keys(newRow).find(
-        (key) => newRow[key] !== oldRow[key]
-      );
-
-      if (!changedField) {
-        setSync(false);
-        return oldRow;
-      }
-
-      const updatedValue = newRow[changedField];
-      const fieldConfig = headerColumnsConfig[changedField];
-
-      // Validación: campo obligatorio no puede ser null o vacío
-      if (
-        fieldConfig &&
-        fieldConfig.nullable === false &&
-        (updatedValue === null ||
-          updatedValue === undefined ||
-          updatedValue === "")
-      ) {
-        throw new Error(
-          `El campo "${fieldConfig.headerName}" no puede estar vacío.`
+        return firstImage ? (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              maxWidth: "5rem",
+              height: "100%",
+              backgroundColor: "var(--background-secondary)",
+              borderRadius: "0.5rem",
+              cursor: "pointer",
+            }}
+            onClick={() => handleOpenImageModal(params.row)}
+          >
+            <img
+              src={firstImage}
+              alt="producto"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                borderRadius: 4,
+              }}
+            />
+          </div>
+        ) : (
+          <Button
+            style={{ minWidth: "100%", minHeight: "100%" }}
+            onClick={() => handleOpenImageModal(params.row)}
+          >
+            <Image
+              sx={{
+                margin: "auto",
+                fontSize: 20,
+                cursor: "pointer",
+              }}
+            />
+          </Button>
         );
-      }
-      if (fieldConfig && fieldConfig?.type === "number" && updatedValue < 0) {
-        throw new Error(
-          `El campo "${fieldConfig.headerName}" no puede ser negativo.`
-        );
-      }
-      apiRef.current.updateRows([newRow]);
-      // Actualizar en Supabase
-      const { error } = await supabase
-        .from("products")
-        .update({ [changedField]: updatedValue })
-        .eq("id", newRow.id);
+      },
+    },
+    {
+      field: "created_at",
+      headerName: "Fecha de creación",
+      type: "text",
+      nullable: true,
+      editable: false,
+      default: new Date().toISOString(),
+      sortable: true,
+    },
+    {
+      field: "id",
+      headerName: "id",
+      type: "text",
+      nullable: true,
+      editable: true,
+    },
+  ];
 
-      if (error) throw error;
-
-      return newRow;
-    } catch (err) {
-      setError(err.message || "Error al actualizar");
-      return oldRow;
-    } finally {
-      setSync(false);
-      requestLock.current = false;
-    }
-  };
-
-  const handleCancelNewRow = (id) => {
-    setError(false);
-    apiRef.current.updateRows([{ id, _action: "delete" }]);
-  };
-
-  const handleSaveNewRow = async (row) => {
-    setError(false);
-    const id = row.id;
-
-    const requiredFields = Object.entries(headerColumnsConfig)
-      .filter(([_, config]) => config.nullable === false)
-      .map(([key]) => key);
-
-    const missingFields = [];
-
-    for (const field of requiredFields) {
-      const value = row[field];
-      const config = headerColumnsConfig[field];
-
-      if (config.type === "string") {
-        if (typeof value !== "string" || value.trim() === "") {
-          missingFields.push(config.headerName || field);
-        }
-      } else if (config.type === "number") {
-        if (value === null || value === undefined || value === "") {
-          missingFields.push(config.headerName || field);
-        }
-      } else {
-        if (value === null || value === undefined || value === "") {
-          missingFields.push(config.headerName || field);
-        }
-      }
-    }
-
-    if (missingFields.length > 0) {
-      setError(`Complete los campos obligatorios: ${missingFields.join(", ")}`);
-      return;
-    }
-
-    // Validar campos numéricos negativos
-    const negativeFields = Object.entries(headerColumnsConfig)
-      .filter(([key, config]) => config.type === "number" && row[key] < 0)
-      .map(([key]) => headerColumnsConfig[key].headerName || key);
-
-    if (negativeFields.length > 0) {
-      setError(
-        `Los siguientes campos no pueden ser negativos: ${negativeFields.join(
-          ", "
-        )}`
-      );
-      return;
-    }
-
-    // Validar si ya existe un producto idéntico
-    const isDuplicate = rows.some(
-      (r) =>
-        r.id !== id &&
-        r.product === row.product &&
-        r.watts === row.watts &&
-        r.price === row.price &&
-        r.stock === row.stock &&
-        r.color === row.color
-    );
-
-    if (isDuplicate) {
-      setError(
-        "Ya existe un producto con los mismos valores (producto, watts, precio, stock y color)."
-      );
-      return;
-    }
-
-    if (requestLock.current) return;
-    requestLock.current = true;
-    apiRef.current.updateRows([{ id, _action: "delete" }]);
-    try {
-      setSync("Subiendo producto");
-      const { id, isNew, ...newProduct } = row;
-
-      newProduct.price = String(newProduct.price);
-      newProduct.images = !newProduct.images ? [] : newProduct.images;
-
-      const { error, data } = await supabase
-        .from("products")
-        .insert([newProduct])
-        .select();
-
-      if (error) throw error;
-
-      const insertedRow = data?.[0];
-      apiRef.current.updateRows([insertedRow]);
-      if (!insertedRow)
-        throw new Error("No se pudo obtener el producto creado.");
-    } catch (err) {
-      setError("Hubo un error al guardar el producto.");
-    } finally {
-      setSync(false);
-      requestLock.current = false;
-    }
-  };
+  const action = createActions(
+    "products",
+    "producto",
+    supabase,
+    apiRef,
+    setSync,
+    setError,
+    requestLock,
+    columns,
+    rows,
+    rowsSelected,
+    selectedRowModal,
+    setSelectedRowModal,
+    categories
+  );
 
   const handleOpenImageModal = (row) => {
     setSelectedRowModal({
@@ -475,7 +357,7 @@ export default function ProductsTable() {
     setSelectedRowModal(null);
   };
 
-  const handleImageChange = async (e) => {
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -494,103 +376,12 @@ export default function ProductsTable() {
 
       e.target.value = "";
 
-      uploadImage(file, fileInputRef.current.dataset.index);
-    }
-  };
-  const handleDeleteImage = async (e, index) => {
-    e.stopPropagation(); // para que no dispare el click de upload
-    if (requestLock.current) return;
-    requestLock.current = true;
-
-    setSync("Eliminando imagen");
-    const updated = [...(selectedRowModal.images || [])];
-    updated.splice(index, 1); // elimina la imagen
-
-    apiRef.current.updateRows([{ id: selectedRowModal.id, images: updated }]);
-    setSelectedRowModal((prev) => {
-      return { ...prev, images: updated };
-    });
-
-    try {
-      if (selectedRowModal.isNew) {
-        return;
-      }
-      const hasBlob = selectedRowModal.images.filter((img) =>
-        img.includes("blob")
-      );
-      console.log(hasBlob);
-
-      if (hasBlob?.length) {
-        throw Error("url con Blob");
-      }
-      const { updateError } = await supabase
-        .from("products")
-        .update({ images: updated })
-        .eq("id", selectedRowModal.id);
-      if (updateError) throw new Error();
-    } catch (err) {
-      setError("Error al actualizar la imagen: " + err.message);
-    } finally {
-      setSync(false);
-      requestLock.current = false;
-    }
-  };
-
-  const uploadImage = async (file, index) => {
-    if (!file || index === undefined || index === null) return;
-
-    if (requestLock.current) return;
-    requestLock.current = true;
-    setSync("Subiendo imagen");
-    setError(false);
-    try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `product_${Date.now()}.${fileExt}`;
-      const filePath = `product-image/${fileName}`;
-      const { uploadError } = await supabase.storage
-        .from("assets")
-        .upload(filePath, file);
-      if (uploadError) {
-        throw new Error("Error al subir la imagen: " + uploadError.message);
-      }
-      setSync("Obteniendo url de la imagen");
-      const { data, bucketError } = supabase.storage
-        .from("assets")
-        .getPublicUrl(filePath);
-      const publicUrl = data.publicUrl;
-      if (bucketError) {
-        throw new Error("Error al buscar la imagen: " + bucketError.message);
-      }
-      const updated = [...selectedRowModal.images];
-      updated[index] = publicUrl;
-      apiRef.current.updateRows([{ id: selectedRowModal.id, images: updated }]);
-      setSelectedRowModal((prev) => {
-        return { ...prev, images: updated };
-      });
-      if (selectedRowModal.isNew) {
-        return;
-      }
-      setSync("Actualizando Base de datos");
-      const { response, updateError } = await supabase
-        .from("products")
-        .update({ images: updated })
-        .eq("id", selectedRowModal.id);
-
-      if (updateError) {
-        throw new Error(
-          "Error al actualizar la imagen: " + updateError.message
-        );
-      }
-    } catch (err) {
-      setError(err);
-    } finally {
-      setSync(false);
-      requestLock.current = false;
+      action.uploadImage(file, fileInputRef.current.dataset.index);
     }
   };
 
   return (
-    <ThemeProvider theme={customTheme}>
+    <>
       <div className="tableContainer">
         <DataGrid
           rows={rows}
@@ -605,7 +396,7 @@ export default function ProductsTable() {
             if (params.row.isNew) classes.push("noHover");
             return classes.join(" ");
           }}
-          processRowUpdate={processRowUpdate}
+          processRowUpdate={action.rowUpdate}
           onProcessRowUpdateError={(error) => setError(error.message)}
           checkboxSelection
           showToolbar
@@ -637,9 +428,10 @@ export default function ProductsTable() {
               setRowsSelected,
               loading,
               columns,
-              headerColumnsConfig,
               requestLock,
-              handleAddRow,
+              addRow: action.addRow,
+              setRowsValue: action.setRowsValue,
+              importFile: action.importFile,
             },
           }}
         />
@@ -679,7 +471,6 @@ export default function ProductsTable() {
         >
           {selectedRowModal && (
             <>
-              {/* Botón de cerrar */}
               <Tooltip title="Cerrar">
                 <Button
                   onClick={handleCloseImageModal}
@@ -719,12 +510,11 @@ export default function ProductsTable() {
                         flexDirection: "column",
                       }}
                     >
-                      {/* Botón eliminar si hay imagen */}
                       {img && (
                         <Tooltip title="Eliminar">
                           <IconButton
                             size="small"
-                            onClick={(e) => handleDeleteImage(e, index)}
+                            onClick={(e) => action.deleteImage(e, index)}
                             sx={{
                               position: "absolute",
                               top: 4,
@@ -811,6 +601,6 @@ export default function ProductsTable() {
           )}
         </Box>
       </Modal>
-    </ThemeProvider>
+    </>
   );
 }

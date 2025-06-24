@@ -36,8 +36,6 @@ import {
   FileDownload,
 } from "@mui/icons-material";
 import Status from "@/components/admin/Status";
-import exportToExcel from "@/lib/export";
-import { importExcelFile } from "@/lib/import";
 
 const StyledQuickFilter = styled(QuickFilter)({
   display: "grid",
@@ -61,130 +59,25 @@ const StyledTextField = styled(TextField)(({ theme, ownerState }) => ({
   opacity: ownerState.expanded ? 1 : 0,
   transition: theme.transitions.create(["width", "opacity"]),
 }));
+import exportToExcel from "@/lib/excel/export";
 
 export default function customToolbar({
-  sync,
-  setSync,
-  error,
-  setError,
-  rows,
-  setRows,
-  apiRef,
-  rowsSelected,
   loading,
+  sync,
+  error,
+  rows,
+  rowsSelected,
   columns,
-  headerColumnsConfig,
-  requestLock,
-  handleAddRow,
+  addRow,
+  setRowsValue,
+  importFile,
 }) {
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const exportMenuTriggerRef = useRef(null);
   const [importMenuOpen, setImportMenuOpen] = useState(false);
   const importMenuTriggerRef = useRef(null);
-  const fileInputRef = useRef(null);
+  const fileImportInputRef = useRef(null);
 
-  const handleActive = async (value) => {
-    if (requestLock.current) return;
-    requestLock.current = true;
-    setSync(true);
-    setError(false);
-
-    rowsSelected.forEach((rowId) => {
-      apiRef.current.updateRows([{ id: rowId, active: value }]);
-    });
-    const updates = rowsSelected.map((id) =>
-      supabase.from("products").update({ active: value }).eq("id", id)
-    );
-    try {
-      const results = await Promise.all(updates);
-      const hasError = results.some((res) => res.error);
-      if (hasError) {
-        throw new Error("Error actualizando algunos registros");
-      }
-    } catch (error) {
-      setError(error);
-    } finally {
-      setSync(false);
-      requestLock.current = false;
-    }
-  };
-
-  const handleImport = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const fileName = file.name.toLowerCase();
-    setError(false);
-    if (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xls")) {
-      setError("Formato no válido. Usá un archivo Excel o csv (.xlsx, .xls)");
-      setSync(false);
-      return;
-    }
-
-    if (fileName.endsWith(".xlsx") || fileName.endsWith(".xls")) {
-      try {
-        setSync("Importando archivo Excel");
-        const importedRows = await importExcelFile(file, headerColumnsConfig);
-        const rowsToUpdate = importedRows.filter((importedRow) =>
-          rows.some(
-            (existingRow) => existingRow.product === importedRow.product
-          )
-        );
-        if (rowsToUpdate?.length) {
-          const formatedUpdateRows = rowsToUpdate.map(({ id, ...rest }) => ({
-            ...rest,
-            price: String(rest.price),
-          }));
-          const updates = formatedUpdateRows.map((row) =>
-            supabase.from("products").update(row).eq("product", row.product)
-          );
-          setSync("Actualizando base de datos");
-          const { error: updateError } = await Promise.all(updates);
-          if (updateError) {
-            throw new Error("Error al actualizar base de datos");
-          }
-        }
-        const newRows = importedRows.filter(
-          (importedRow) =>
-            !rows.some(
-              (existingRow) => existingRow.product === importedRow.product
-            )
-        );
-
-        if (newRows?.length) {
-          setSync("Subiendo los nuevos productos");
-          const formatedNewRows = newRows.map(({ id, ...rest }) => ({
-            ...rest,
-            price: String(rest.price),
-          }));
-
-          const { error: uploadError } = await supabase
-            .from("products")
-            .insert(formatedNewRows);
-
-          if (uploadError) {
-            throw new Error("Error al agregar productos a la base de datos");
-          }
-        }
-      } catch (err) {
-        setError(err.message);
-        setSync(false);
-      }
-    }
-    setSync("Obteniendo productos actualizados");
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .order("id", { ascending: true });
-    if (error) {
-      setSync(false);
-      setError("Error al obtener productos:", error.message);
-      return;
-    }
-    setRows(data);
-    setSync(false);
-    e.target.value = null;
-    return;
-  };
   return (
     <Toolbar
       sx={{
@@ -217,7 +110,7 @@ export default function customToolbar({
       >
         {rowsSelected?.length ? (
           <Tooltip title="Desactivar productos">
-            <ToolbarButton onClick={() => handleActive(false)}>
+            <ToolbarButton onClick={() => setRowsValue("active", false)}>
               <Clear fontSize="small" />
             </ToolbarButton>
           </Tooltip>
@@ -226,7 +119,7 @@ export default function customToolbar({
         )}
         {rowsSelected?.length ? (
           <Tooltip title="Activar productos">
-            <ToolbarButton onClick={() => handleActive(true)}>
+            <ToolbarButton onClick={() => setRowsValue("active", true)}>
               <Check fontSize="small" />
             </ToolbarButton>
           </Tooltip>
@@ -235,7 +128,7 @@ export default function customToolbar({
         )}
 
         <Tooltip title="Añadir producto">
-          <ToolbarButton onClick={handleAddRow}>
+          <ToolbarButton onClick={addRow}>
             <Add fontSize="small" />
           </ToolbarButton>
         </Tooltip>
@@ -352,7 +245,7 @@ export default function customToolbar({
           <MenuItem
             onClick={() => {
               setImportMenuOpen(false);
-              fileInputRef.current.click();
+              fileImportInputRef.current.click();
             }}
           >
             Importar Excel
@@ -362,8 +255,8 @@ export default function customToolbar({
         <input
           type="file"
           accept=".xlsx,.xls"
-          ref={fileInputRef}
-          onChange={handleImport}
+          ref={fileImportInputRef}
+          onChange={importFile}
           style={{ display: "none" }}
           disabled={sync}
         />

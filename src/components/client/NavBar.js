@@ -2,7 +2,6 @@ import {
   Toolbar,
   BottomNavigation,
   BottomNavigationAction,
-  Divider,
 } from "@mui/material";
 import {
   ElectricalServices,
@@ -14,13 +13,13 @@ import {
 
 export default function NavBar() {
   return (
-    <Toolbar>
+    <Toolbar sx={{ display: { xs: "none", lg: "flex" } }}>
       <BottomNavigation
         showLabels
         sx={{
           height: "5rem",
-          bgcolor: "#f5f5f5",
           alignItems: "center",
+          borderRadius: "1rem",
           "& .MuiBottomNavigationAction-root": {
             minWidth: "9rem",
             height: "100%",
@@ -35,22 +34,18 @@ export default function NavBar() {
         }}
       >
         <BottomNavigationAction label="Iluminación interior" icon={<Light />} />
-        <Divider orientation="vertical" sx={{ height: "3rem" }} />
         <BottomNavigationAction
           label="Iluminación exterior"
           icon={<WbTwighlight />}
         />
-        <Divider orientation="vertical" sx={{ height: "3rem" }} />
         <BottomNavigationAction
           label="Bombillas y lámparas"
           icon={<WbIncandescent />}
         />
-        <Divider orientation="vertical" sx={{ height: "3rem" }} />
         <BottomNavigationAction
           label="Electricidad"
           icon={<ElectricalServices />}
         />
-        <Divider orientation="vertical" sx={{ height: "3rem" }} />
         <BottomNavigationAction label="Accesorios" icon={<Build />} />
       </BottomNavigation>
     </Toolbar>

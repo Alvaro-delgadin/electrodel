@@ -59,7 +59,6 @@ export default function Dashboard() {
         .gte("created_at", startUTC)
         .lte("created_at", endUTC),
     ]);
-
     if (
       lowStock.error ||
       sales.error ||

@@ -1,8 +1,10 @@
 import "@/styles/client/globals.css";
 import Header from "@/components/client/Header.js";
+import Footer from "@/components/client/Footer";
 import ThemeRegistry from "@/components/client/ThemeRegistry";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { createClient } from "@/lib/supabaseServer";
+import WhatsApp from "@/components/client/Whatsapp";
 export const metadata = {
   title: "Electricidad e Iluminación | Electrodel",
   description:
@@ -40,14 +42,21 @@ export const metadata = {
 export default async function ClientLayout({ children }) {
   const supabase = await createClient();
   const {
-    data: { logo },
+    data: { logo, whatsapp, location, schedule },
   } = await supabase.from("settings").select("*").single();
+
+  const { data } = await supabase
+    .from("products")
+    .select("*")
+    .eq("active", true);
 
   return (
     <AppRouterCacheProvider>
       <ThemeRegistry>
-        <Header logo={logo} />
+        <Header logo={logo} products={data} />
         {children}
+        <WhatsApp whatsapp={whatsapp} />
+        <Footer logo={logo} location={location} schedule={schedule} />
       </ThemeRegistry>
     </AppRouterCacheProvider>
   );

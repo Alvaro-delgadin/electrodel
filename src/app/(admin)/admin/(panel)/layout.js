@@ -8,7 +8,8 @@ import Box from "@mui/material/Box";
 
 import "@/styles/admin/globals.css";
 import Sidebar from "@/components/admin/sidebar.js";
-
+import { ThemeProvider } from "@mui/material";
+import { theme } from "@/components/admin/theme";
 export default function AdminLayout({ children }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -63,7 +64,7 @@ export default function AdminLayout({ children }) {
   return (
     <>
       <Sidebar />
-      {children}
+      <ThemeProvider theme={theme}>{children}</ThemeProvider>
     </>
   );
 }

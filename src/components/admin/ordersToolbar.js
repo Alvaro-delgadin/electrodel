@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { styled } from "@mui/material/styles";
-import { v4 as uuidv4 } from "uuid";
 import {
   Toolbar,
   ToolbarButton,
@@ -12,7 +11,6 @@ import {
   QuickFilterControl,
   QuickFilterClear,
   QuickFilterTrigger,
-  GridRowModes,
 } from "@mui/x-data-grid";
 import {
   Typography,
@@ -58,40 +56,10 @@ const StyledTextField = styled(TextField)(({ theme, ownerState }) => ({
   transition: theme.transitions.create(["width", "opacity"]),
 }));
 
-export default function customToolbar({
-  sync,
-  error,
-  apiRef,
-  loading,
-  headerColumnsConfig,
-}) {
+export default function customToolbar({ loading, sync, error, addRow }) {
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const exportMenuTriggerRef = useRef(null);
 
-  const handleAddRow = () => {
-    const id = `new-${uuidv4()}`;
-
-    const newRow = {
-      id,
-      isNew: true,
-      active: true,
-    };
-
-    Object.entries(headerColumnsConfig).forEach(([key, config]) => {
-      if (key === "id") return;
-
-      newRow[key] =
-        "default" in config
-          ? config.default
-          : config.type === "number"
-          ? 0
-          : config.type === "boolean"
-          ? true
-          : "";
-    });
-
-    apiRef.current?.updateRows([newRow]);
-  };
   return (
     <Toolbar
       sx={{
@@ -123,7 +91,7 @@ export default function customToolbar({
         }}
       >
         <Tooltip title="Añadir pedido">
-          <ToolbarButton onClick={handleAddRow}>
+          <ToolbarButton onClick={addRow}>
             <Add fontSize="small" />
           </ToolbarButton>
         </Tooltip>
