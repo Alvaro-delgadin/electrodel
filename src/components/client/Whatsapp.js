@@ -15,7 +15,7 @@ export default function WhatsApp({ whatsapp }) {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background: "#00e676",
+        background: "#6a994e",
         width: "4rem",
         height: "4rem",
         padding: "0.8rem",

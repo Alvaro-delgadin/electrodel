@@ -41,11 +41,10 @@ export const metadata = {
 
 export default async function ClientLayout({ children }) {
   const supabase = await createClient();
-  const {
-    data: { logo, whatsapp, location, schedule },
-  } = await supabase.from("settings").select("*").single();
+  const settings = await supabase.from("settings").select("*").single();
+  const brand = settings?.data;
 
-  const { data } = await supabase
+  const { data: products } = await supabase
     .from("products")
     .select("*")
     .eq("active", true);
@@ -53,10 +52,14 @@ export default async function ClientLayout({ children }) {
   return (
     <AppRouterCacheProvider>
       <ThemeRegistry>
-        <Header logo={logo} products={data} />
+        <Header logo={brand?.logo} products={products} />
         {children}
-        <WhatsApp whatsapp={whatsapp} />
-        <Footer logo={logo} location={location} schedule={schedule} />
+        <WhatsApp whatsapp={brand?.whatsapp} />
+        <Footer
+          logo={brand?.logo}
+          location={brand?.location}
+          schedule={brand?.schedule}
+        />
       </ThemeRegistry>
     </AppRouterCacheProvider>
   );

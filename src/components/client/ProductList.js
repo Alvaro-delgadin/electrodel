@@ -1,75 +1,51 @@
-import Image from "next/image";
-import {
-  Card,
-  CardContent,
-  CardActions,
-  Typography,
-  Button,
-  Box,
-} from "@mui/material";
-import { ShoppingCart } from "@mui/icons-material";
+import { Typography, Box } from "@mui/material";
+import { Inventory2Outlined } from "@mui/icons-material";
+import ProductCard from "./ProductCard";
+
 export default function ProductList({ products }) {
+  const groupedProducts = Object.values(
+    products.reduce((acc, product) => {
+      const key = product.product;
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(product);
+      return acc;
+    }, {})
+  );
+
   return (
     <Box
       sx={{
-        display: "grid",
-        gridTemplateColumns: {
-          xs: "1fr",
-          sm: "1fr 1fr",
-          md: "1fr 1fr 1fr",
-        },
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-around",
+        flexWrap: "wrap",
         gap: 2,
       }}
     >
-      {products?.map((product) => (
-        <Card
-          sx={{
-            width: "18rem",
-            bgcolor: "#f5f5f5",
-            transition: "filter 0.3s ease",
-            filter: "brightness(1)",
-            "&:hover": {
-              filter: "brightness(0.9) contrast(1.3)",
-            },
-          }}
-          key={product.id}
+      {groupedProducts?.length ? (
+        groupedProducts?.map((variants) => (
+          <ProductCard
+            key={variants[0].id}
+            productName={variants[0].product}
+            variants={variants}
+          />
+        ))
+      ) : (
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          py={6}
+          color="text.secondary"
         >
-          {product?.images[0] ? (
-            <Image
-              height={200}
-              width={320}
-              src={product.images[0]}
-              alt={product.product}
-              style={{
-                objectFit: "contain",
-              }}
-            />
-          ) : (
-            <Box height={200} width={320}></Box>
-          )}
-          <CardContent>
-            <Typography variant="h6" component="div" noWrap>
-              {product.product}
-            </Typography>
-            <Typography variant="body2" color="secondary">
-              {product.category}
-            </Typography>
-            <Typography variant="h6" sx={{ mt: 1 }}>
-              ${product.price}
-            </Typography>
-          </CardContent>
-          <CardActions>
-            <Button
-              fullWidth
-              variant="contained"
-              sx={{ padding: "0.5rem", gap: "0.5rem" }}
-            >
-              Agregar al carrito
-              <ShoppingCart />
-            </Button>
-          </CardActions>
-        </Card>
-      ))}
+          <Inventory2Outlined sx={{ fontSize: 64, mb: 2 }} />
+          <Typography variant="h6">No se encontraron productos</Typography>
+          <Typography variant="body2">
+            Probá con otra categoría o buscá algo diferente.
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 }

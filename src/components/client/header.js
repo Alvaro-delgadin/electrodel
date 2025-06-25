@@ -2,6 +2,7 @@ import { Box, AppBar, Toolbar } from "@mui/material";
 import Image from "next/image";
 import NavBar from "@/components/client/NavBar";
 import HeaderActions from "./HeaderActions";
+import Link from "next/link";
 
 export default function Header({ logo, products }) {
   return (
@@ -21,19 +22,21 @@ export default function Header({ logo, products }) {
           gap: "1rem",
         }}
       >
-        <Box sx={{ height: "100%", width: "auto" }}>
-          {logo ? (
-            <Image
-              src={logo}
-              width={140}
-              height={100}
-              alt="Logo"
-              style={{ objectFit: "contain" }}
-            />
-          ) : (
-            ""
-          )}
-        </Box>
+        <Link href="/">
+          <Box sx={{ height: "100%", width: "auto" }}>
+            {logo ? (
+              <Image
+                src={logo}
+                width={140}
+                height={100}
+                alt="Logo"
+                style={{ objectFit: "contain" }}
+              />
+            ) : (
+              ""
+            )}
+          </Box>
+        </Link>
         <NavBar />
         <HeaderActions products={products} />
       </Toolbar>
