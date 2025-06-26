@@ -12,7 +12,7 @@ import {
   Grid,
   IconButton,
 } from "@mui/material";
-import customToolbar from "@/components/admin/productsToolbar.js";
+import CustomToolbar from "@/components/admin/productsToolbar.js";
 import {
   Save,
   Cancel,
@@ -62,7 +62,7 @@ export default function ProductsTable() {
       getActions: ({ id, row }) => {
         if (row.isNew) {
           return [
-            <Tooltip title="Guardar">
+            <Tooltip title="Guardar" key={1}>
               <GridActionsCellItem
                 icon={<Save />}
                 label="Guardar"
@@ -71,7 +71,7 @@ export default function ProductsTable() {
                 }}
               />
             </Tooltip>,
-            <Tooltip title="Cancelar">
+            <Tooltip title="Cancelar" key={2}>
               <GridActionsCellItem
                 icon={<Cancel />}
                 label="Cancelar"
@@ -81,7 +81,7 @@ export default function ProductsTable() {
           ];
         }
         return [
-          <Tooltip title="Duplicar">
+          <Tooltip title="Duplicar" key={3}>
             <GridActionsCellItem
               icon={<ContentCopy />}
               label="Duplicar"
@@ -369,7 +369,7 @@ export default function ProductsTable() {
             );
           }}
           slots={{
-            toolbar: customToolbar,
+            toolbar: CustomToolbar,
           }}
           slotProps={{
             toolbar: {

@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { DataGrid, GridActionsCellItem, useGridApiRef } from "@mui/x-data-grid";
 import { esES } from "@mui/x-data-grid/locales";
 import { Tooltip } from "@mui/material";
-import customToolbar from "@/components/admin/ordersToolbar.js";
+import CustomToolbar from "@/components/admin/ordersToolbar.js";
 import { Save, Cancel, Delete } from "@mui/icons-material";
 import { createActions } from "@/lib/crud/crud";
 
@@ -130,7 +130,7 @@ export default function OrdersTable() {
       getActions: ({ id, row }) => {
         if (row.isNew) {
           return [
-            <Tooltip title="Guardar">
+            <Tooltip title="Guardar" key={1}>
               <GridActionsCellItem
                 icon={<Save />}
                 label="Guardar"
@@ -139,7 +139,7 @@ export default function OrdersTable() {
                 }}
               />
             </Tooltip>,
-            <Tooltip title="Cancelar">
+            <Tooltip title="Cancelar" key={2}>
               <GridActionsCellItem
                 icon={<Cancel />}
                 label="Cancelar"
@@ -149,7 +149,7 @@ export default function OrdersTable() {
           ];
         }
         return [
-          <Tooltip title="Eliminar">
+          <Tooltip title="Eliminar" key={3}>
             <GridActionsCellItem
               icon={<Delete />}
               label="Eliminar"
@@ -197,7 +197,7 @@ export default function OrdersTable() {
         }}
         showToolbar
         slots={{
-          toolbar: customToolbar,
+          toolbar: CustomToolbar,
         }}
         slotProps={{
           toolbar: {

@@ -23,20 +23,20 @@ export default function AdminLayout({ children }) {
   useEffect(() => {
     if (!hasMounted) return;
 
-    const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session) {
-        router.replace("/admin");
-      } else {
-        setLoading(false);
-      }
-    };
-
     checkSession();
   }, [hasMounted]);
+
+  const checkSession = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      router.replace("/admin");
+    } else {
+      setLoading(false);
+    }
+  };
 
   if (!hasMounted) {
     // Evitar render SSR con MUI (no emitir spinner)

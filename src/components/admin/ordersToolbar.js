@@ -56,7 +56,7 @@ const StyledTextField = styled(TextField)(({ theme, ownerState }) => ({
   transition: theme.transitions.create(["width", "opacity"]),
 }));
 
-export default function customToolbar({ loading, sync, error, addRow }) {
+export default function CustomToolbar({ loading, sync, error, addRow }) {
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const exportMenuTriggerRef = useRef(null);
 
