@@ -11,11 +11,11 @@ import Link from "next/link";
 
 export default function NavBar() {
   const iconsInOrder = [
-    <Light />,
-    <WbTwighlight />,
-    <WbIncandescent />,
-    <ElectricalServices />,
-    <Build />,
+    <Light key={1} />,
+    <WbTwighlight key={2} />,
+    <WbIncandescent key={3} />,
+    <ElectricalServices key={4} />,
+    <Build key={5} />,
   ];
   return (
     <Box sx={{ display: { xs: "none", lg: "flex" }, gap: 2 }}>

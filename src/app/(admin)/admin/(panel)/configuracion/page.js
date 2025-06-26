@@ -3,12 +3,13 @@ import styles from "./page.module.css";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import Status from "@/components/admin/Status";
+import Image from "next/image";
 
 export default function Settings() {
   const [sync, setSync] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [logoPath, setLogoPath] = useState(undefined);
+  const [logoPath, setLogoPath] = useState(null);
   const [logoFile, setLogoFile] = useState(undefined);
   const [whatsapp, setWhatsapp] = useState("");
   const [location, setLocation] = useState("");
@@ -120,7 +121,6 @@ export default function Settings() {
       }
       setData((prev) => ({ ...prev, location: location }));
     }
-    console.log(schedule);
 
     if (data.schedule !== schedule) {
       setSync("Actualizando horario");
@@ -163,7 +163,18 @@ export default function Settings() {
           loading ? "skeleton" : ""
         }`}
       >
-        <img src={logoPath} className={styles.logo} alt="" />
+        {logoPath ? (
+          <Image
+            src={logoPath}
+            className={styles.logo}
+            alt=""
+            width={120}
+            height={120}
+            style={{ objectFit: "contain" }}
+          />
+        ) : (
+          ""
+        )}
         <input
           onChange={handleFileChange}
           type="file"

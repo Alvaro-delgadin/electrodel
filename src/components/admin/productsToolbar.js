@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { styled } from "@mui/material/styles";
-import { supabase } from "@/lib/supabaseClient";
 import {
   Toolbar,
   ToolbarButton,
@@ -61,7 +60,7 @@ const StyledTextField = styled(TextField)(({ theme, ownerState }) => ({
 }));
 import exportToExcel from "@/lib/excel/export";
 
-export default function customToolbar({
+export default function CustomToolbar({
   loading,
   sync,
   error,

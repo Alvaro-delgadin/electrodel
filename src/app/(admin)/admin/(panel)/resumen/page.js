@@ -7,6 +7,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale } from "react-datepicker";
 import { es } from "date-fns/locale/es";
+import Image from "next/image";
 registerLocale("es", es);
 
 // ✅ Crea fechas en hora local
@@ -171,7 +172,13 @@ export default function Dashboard() {
               <div className={styles.product} key={index}>
                 <div className={styles.imgContainer}>
                   {prod.images[0] && (
-                    <img src={prod.images[0]} alt={prod.product} />
+                    <Image
+                      src={prod.images[0]}
+                      alt={prod.product}
+                      width={80}
+                      height={80}
+                      style={{ objectFit: "contain" }}
+                    />
                   )}
                 </div>
                 <div className={styles.text}>
