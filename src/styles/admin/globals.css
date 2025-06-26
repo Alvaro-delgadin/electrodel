@@ -13,7 +13,7 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background-color: #000;
+  background-color: #303030;
   border-radius: 0.5rem;
 }
 ::-webkit-scrollbar-thumb:hover {

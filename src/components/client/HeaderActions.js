@@ -77,6 +77,11 @@ export default function HeaderActions({ products }) {
       .replace(/\p{Diacritic}/gu, "")
       .toLowerCase();
 
+  function formatPrice(value) {
+    const rounded = Number(value).toFixed(2);
+    const formatted = rounded.endsWith(".00") ? parseInt(rounded) : rounded;
+    return formatted.toLocaleString("es-AR"); // separador de miles y decimal correcto
+  }
   return (
     <Toolbar sx={{ gap: "1rem", paddingInline: "0 !important" }}>
       <IconButton
@@ -338,11 +343,9 @@ export default function HeaderActions({ products }) {
                       </Typography>
                       <Typography variant="body2" fontWeight="bold">
                         Subtotal: $
-                        {(
-                          item.price *
-                          (1 - item.discount / 100) *
-                          item.quantity
-                        ).toFixed(2)}
+                        {formatPrice(
+                          item.price * (1 - item.discount / 100) * item.quantity
+                        )}
                       </Typography>
                     </Box>
 
@@ -364,7 +367,9 @@ export default function HeaderActions({ products }) {
             {/* Total y acción */}
             {cart.length > 0 && (
               <Box sx={{ padding: 2 }}>
-                <Typography variant="h6">Total: ${total.toFixed(2)}</Typography>
+                <Typography variant="h6">
+                  Total: ${formatPrice(total)}
+                </Typography>
                 <Button
                   variant="contained"
                   color="primary"

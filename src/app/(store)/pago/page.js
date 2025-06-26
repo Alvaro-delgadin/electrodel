@@ -83,7 +83,14 @@ export default function CheckoutPage() {
 
   return (
     <main>
-      <Box sx={{ maxWidth: 600, margin: "2rem auto", padding: 2 }}>
+      <Box
+        sx={{
+          maxWidth: "30rem",
+          width: "100%",
+          margin: "2rem auto",
+          padding: 2,
+        }}
+      >
         <Typography variant="h4" gutterBottom>
           Resumen del pedido
         </Typography>
@@ -114,13 +121,14 @@ export default function CheckoutPage() {
           Total: ${total.toFixed(2)}
         </Typography>
 
-        <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
-          <Button
-            onClick={handleSuccess}
-            variant="contained"
-            color="success"
-            fullWidth
-          >
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            mt: 3,
+          }}
+        >
+          <Button onClick={handleSuccess} variant="contained" color="success">
             Simular pago exitoso
           </Button>
           <Link href="/pago/error">

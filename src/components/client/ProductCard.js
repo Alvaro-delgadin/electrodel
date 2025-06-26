@@ -28,25 +28,17 @@ export default function ProductCard({ productName, variants }) {
   const open = Boolean(anchorEl);
   const { addToCart } = useCartStore.getState();
   const cart = useCartStore((state) => state.cart);
-  const quantityInCart = cart
-    .filter((item) => item.id === selectedVariant?.id)
-    .reduce((sum, item) => sum + item.quantity, 0);
 
-  const maxAvailable = selectedVariant
-    ? selectedVariant.stock - quantityInCart
-    : 0;
+  // Detectar si hay variantes con color o potencia
+  const hasColor = variants.some((v) => !!v.color);
+  const hasWatts = variants.some((v) => !!v.watts);
 
-  const handleClick = (event) => setAnchorEl(event.currentTarget);
-  const handleClose = () => setAnchorEl(null);
-
-  // Potencias disponibles según color
   const filteredWatts = [
     ...new Set(
       variants.filter((v) => !color || v.color === color).map((v) => v.watts)
     ),
   ];
 
-  // Colores disponibles según potencia (bidireccional)
   const filteredColors = [
     ...new Set(
       variants
@@ -58,16 +50,34 @@ export default function ProductCard({ productName, variants }) {
   const handleReset = () => {
     setColor("");
     setPower("");
-    setQuantity("");
+    setQuantity("1");
     setSelectedVariant(null);
   };
-  // Actualizar selectedVariant
+
+  // Seleccionar variante según atributos seleccionados
   useEffect(() => {
+    if (!hasColor && !hasWatts && variants.length === 1) {
+      setSelectedVariant(variants[0]);
+      return;
+    }
+
     const variant = variants.find(
-      (v) => v.color === color && v.watts === Number(power)
+      (v) =>
+        (!hasColor || v.color === color) &&
+        (!hasWatts || v.watts === Number(power))
     );
     setSelectedVariant(variant || null);
-  }, [color, power, variants]);
+  }, [color, power, variants, hasColor, hasWatts]);
+
+  // Autoseleccionar si hay un solo color/potencia
+  useEffect(() => {
+    if (hasColor && filteredColors.length === 1) {
+      setColor(filteredColors[0]);
+    }
+    if (hasWatts && filteredWatts.length === 1) {
+      setPower(filteredWatts[0].toString());
+    }
+  }, [filteredColors, filteredWatts, hasColor, hasWatts]);
 
   // Limpiar potencia si ya no es válida
   useEffect(() => {
@@ -76,12 +86,22 @@ export default function ProductCard({ productName, variants }) {
     }
   }, [color]);
 
-  // Precio calculado
+  const quantityInCart = cart
+    .filter((item) => item.id === selectedVariant?.id)
+    .reduce((sum, item) => sum + item.quantity, 0);
+
+  const maxAvailable = selectedVariant
+    ? selectedVariant.stock - quantityInCart
+    : 0;
+
   const price = selectedVariant?.price || 0;
   const finalPrice =
     quantity && !isNaN(quantity) && !isNaN(selectedVariant?.discount)
       ? price * (1 - selectedVariant?.discount / 100) * Number(quantity)
       : 0;
+
+  const handleClick = (event) => setAnchorEl(event.currentTarget);
+  const handleClose = () => setAnchorEl(null);
 
   const handleAddToCart = () => {
     if (selectedVariant && Number(quantity) > 0) {
@@ -96,6 +116,11 @@ export default function ProductCard({ productName, variants }) {
     }
   };
 
+  function formatPrice(value) {
+    const rounded = Number(value).toFixed(2);
+    const formatted = rounded.endsWith(".00") ? parseInt(rounded) : rounded;
+    return formatted.toLocaleString("es-AR"); // separador de miles y decimal correcto
+  }
   return (
     <Card
       sx={{
@@ -113,17 +138,17 @@ export default function ProductCard({ productName, variants }) {
         href={`/producto/${variants[0].id}`}
         style={{ textDecoration: "none", color: "inherit" }}
       >
-        {variants[0]?.images?.[0] ? (
-          <Box
-            sx={{
-              maxWidth: "16rem",
-              width: "100%",
-              aspectRatio: "1/1",
-              borderRadius: 2,
-              overflow: "hidden",
-              marginInline: "auto",
-            }}
-          >
+        <Box
+          sx={{
+            maxWidth: "16rem",
+            width: "100%",
+            aspectRatio: "1/1",
+            borderRadius: 2,
+            overflow: "hidden",
+            marginInline: "auto",
+          }}
+        >
+          {variants[0]?.images?.[0] && (
             <Image
               height={200}
               width={200}
@@ -131,19 +156,8 @@ export default function ProductCard({ productName, variants }) {
               alt={productName}
               style={{ objectFit: "contain", width: "100%", height: "100%" }}
             />
-          </Box>
-        ) : (
-          <Box
-            sx={{
-              maxWidth: "16rem",
-              width: "100%",
-              aspectRatio: "1/1",
-              borderRadius: 2,
-              overflow: "hidden",
-              marginInline: "auto",
-            }}
-          ></Box>
-        )}
+          )}
+        </Box>
 
         <CardContent>
           <Typography variant="h6" component="div" noWrap>
@@ -154,13 +168,14 @@ export default function ProductCard({ productName, variants }) {
           </Typography>
           <Typography variant="h6" sx={{ mt: 1 }}>
             {variants.length > 1
-              ? `Desde $${Math.min(
-                  ...variants.map((v) => v.price * (1 - v.discount / 100))
+              ? `Desde $${formatPrice(
+                  Math.min(
+                    ...variants.map((v) => v.price * (1 - v.discount / 100))
+                  )
                 )}`
-              : `$${(
-                  variants[0].price *
-                  (1 - variants[0].discount / 100)
-                ).toFixed(2)}`}
+              : `$${formatPrice(
+                  variants[0].price * (1 - variants[0].discount / 100)
+                )}`}
           </Typography>
         </CardContent>
       </Link>
@@ -191,35 +206,39 @@ export default function ProductCard({ productName, variants }) {
               gap: 2,
             }}
           >
-            <FormControl fullWidth>
-              <InputLabel>Color</InputLabel>
-              <Select
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-                label="Color"
-              >
-                {filteredColors.map((c) => (
-                  <MenuItem key={c} value={c}>
-                    {c}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            {hasColor && (
+              <FormControl fullWidth>
+                <InputLabel>Color</InputLabel>
+                <Select
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                  label="Color"
+                >
+                  {filteredColors.map((c) => (
+                    <MenuItem key={c} value={c}>
+                      {c}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
 
-            <FormControl fullWidth>
-              <InputLabel>Potencia</InputLabel>
-              <Select
-                value={power}
-                onChange={(e) => setPower(e.target.value)}
-                label="Potencia"
-              >
-                {filteredWatts.map((w) => (
-                  <MenuItem key={w} value={w}>
-                    {w}W
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            {hasWatts && (
+              <FormControl fullWidth>
+                <InputLabel>Potencia</InputLabel>
+                <Select
+                  value={power}
+                  onChange={(e) => setPower(e.target.value)}
+                  label="Potencia"
+                >
+                  {filteredWatts.map((w) => (
+                    <MenuItem key={w} value={w}>
+                      {w}W
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
 
             <TextField
               label="Cantidad"
@@ -246,7 +265,7 @@ export default function ProductCard({ productName, variants }) {
             />
 
             <Typography variant="subtitle1">
-              Precio final: ${finalPrice.toFixed(2)}
+              Precio final: ${formatPrice(finalPrice)}
             </Typography>
 
             <Button
@@ -257,6 +276,7 @@ export default function ProductCard({ productName, variants }) {
             >
               Limpiar
             </Button>
+
             <Button
               variant="contained"
               color="primary"
@@ -266,11 +286,14 @@ export default function ProductCard({ productName, variants }) {
                 !selectedVariant ||
                 Number(quantity) < 1 ||
                 Number(quantity) > maxAvailable ||
-                maxAvailable < 1
+                maxAvailable < 1 ||
+                (hasColor && !color) ||
+                (hasWatts && !power)
               }
             >
               Confirmar
             </Button>
+
             {maxAvailable <= 0 && selectedVariant && (
               <Typography color="error">
                 Ya agregaste todo el stock disponible al carrito.
