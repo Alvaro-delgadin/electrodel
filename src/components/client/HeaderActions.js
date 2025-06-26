@@ -16,7 +16,7 @@ import {
   ListItemButton,
   ListItemText,
   IconButton,
-  SwipeableDrawer,
+  Drawer,
   Badge,
   Toolbar,
   TextField,
@@ -118,7 +118,7 @@ export default function HeaderActions({ products }) {
       >
         <Menu />
       </IconButton>
-      <SwipeableDrawer
+      <Drawer
         anchor="right"
         slotProps={{
           paper: {
@@ -131,7 +131,6 @@ export default function HeaderActions({ products }) {
         sx={{ gap: 0 }}
         open={open}
         onClose={() => setOpen(false)}
-        onOpen={() => setOpen("menu")}
       >
         {open === "menu" ? (
           <List
@@ -366,23 +365,25 @@ export default function HeaderActions({ products }) {
             {cart.length > 0 && (
               <Box sx={{ padding: 2 }}>
                 <Typography variant="h6">Total: ${total.toFixed(2)}</Typography>
-                <Link href="/pago">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    sx={{ mt: 2 }}
-                  >
-                    Finalizar compra
-                  </Button>
-                </Link>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  sx={{ mt: 2 }}
+                  onClick={() => {
+                    setOpen(false);
+                    router.push("/pago");
+                  }}
+                >
+                  Finalizar compra
+                </Button>
               </Box>
             )}
           </List>
         ) : (
           ""
         )}
-      </SwipeableDrawer>
+      </Drawer>
     </Toolbar>
   );
 }
