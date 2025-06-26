@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -26,6 +27,14 @@ export default function ProductCard({ productName, variants }) {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const open = Boolean(anchorEl);
   const { addToCart } = useCartStore.getState();
+  const cart = useCartStore((state) => state.cart);
+  const quantityInCart = cart
+    .filter((item) => item.id === selectedVariant?.id)
+    .reduce((sum, item) => sum + item.quantity, 0);
+
+  const maxAvailable = selectedVariant
+    ? selectedVariant.stock - quantityInCart
+    : 0;
 
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
@@ -70,7 +79,9 @@ export default function ProductCard({ productName, variants }) {
   // Precio calculado
   const price = selectedVariant?.price || 0;
   const finalPrice =
-    quantity && !isNaN(quantity) ? price * Number(quantity) : 0;
+    quantity && !isNaN(quantity) && !isNaN(selectedVariant?.discount)
+      ? price * (1 - selectedVariant?.discount / 100) * Number(quantity)
+      : 0;
 
   const handleAddToCart = () => {
     if (selectedVariant && Number(quantity) > 0) {
@@ -98,31 +109,61 @@ export default function ProductCard({ productName, variants }) {
       }}
       key={variants[0].id}
     >
-      {variants[0]?.images?.[0] ? (
-        <Image
-          height={200}
-          width={320}
-          src={variants[0].images[0]}
-          alt={productName}
-          style={{ objectFit: "contain" }}
-        />
-      ) : (
-        <Box height={200} width={320}></Box>
-      )}
+      <Link
+        href={`/producto/${variants[0].id}`}
+        style={{ textDecoration: "none", color: "inherit" }}
+      >
+        {variants[0]?.images?.[0] ? (
+          <Box
+            sx={{
+              maxWidth: "16rem",
+              width: "100%",
+              aspectRatio: "1/1",
+              borderRadius: 2,
+              overflow: "hidden",
+              marginInline: "auto",
+            }}
+          >
+            <Image
+              height={200}
+              width={200}
+              src={variants[0].images[0]}
+              alt={productName}
+              style={{ objectFit: "contain", width: "100%", height: "100%" }}
+            />
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              maxWidth: "16rem",
+              width: "100%",
+              aspectRatio: "1/1",
+              borderRadius: 2,
+              overflow: "hidden",
+              marginInline: "auto",
+            }}
+          ></Box>
+        )}
 
-      <CardContent>
-        <Typography variant="h6" component="div" noWrap>
-          {productName}
-        </Typography>
-        <Typography variant="body2" color="secondary">
-          {variants[0].category}
-        </Typography>
-        <Typography variant="h6" sx={{ mt: 1 }}>
-          {variants.length > 1
-            ? `Desde $${Math.min(...variants.map((v) => v.price))}`
-            : `$${variants[0].price}`}
-        </Typography>
-      </CardContent>
+        <CardContent>
+          <Typography variant="h6" component="div" noWrap>
+            {productName}
+          </Typography>
+          <Typography variant="body2" color="secondary">
+            {variants[0].category}
+          </Typography>
+          <Typography variant="h6" sx={{ mt: 1 }}>
+            {variants.length > 1
+              ? `Desde $${Math.min(
+                  ...variants.map((v) => v.price * (1 - v.discount / 100))
+                )}`
+              : `$${(
+                  variants[0].price *
+                  (1 - variants[0].discount / 100)
+                ).toFixed(2)}`}
+          </Typography>
+        </CardContent>
+      </Link>
 
       <CardActions>
         <Button
@@ -186,15 +227,26 @@ export default function ProductCard({ productName, variants }) {
               value={quantity}
               onChange={(e) => {
                 const val = e.target.value;
-                if (val === "" || /^\d+$/.test(val)) {
-                  setQuantity(val);
+                if (val === "") {
+                  setQuantity("");
+                } else {
+                  const num = Number(val);
+                  if (!isNaN(num) && num >= 1 && num <= maxAvailable) {
+                    setQuantity(val);
+                  }
                 }
+              }}
+              slotProps={{
+                input: {
+                  min: 1,
+                  max: maxAvailable,
+                },
               }}
               fullWidth
             />
 
             <Typography variant="subtitle1">
-              Precio final: ${finalPrice}
+              Precio final: ${finalPrice.toFixed(2)}
             </Typography>
 
             <Button
@@ -210,10 +262,20 @@ export default function ProductCard({ productName, variants }) {
               color="primary"
               fullWidth
               onClick={handleAddToCart}
-              disabled={!selectedVariant || Number(quantity) < 1}
+              disabled={
+                !selectedVariant ||
+                Number(quantity) < 1 ||
+                Number(quantity) > maxAvailable ||
+                maxAvailable < 1
+              }
             >
               Confirmar
             </Button>
+            {maxAvailable <= 0 && selectedVariant && (
+              <Typography color="error">
+                Ya agregaste todo el stock disponible al carrito.
+              </Typography>
+            )}
           </Box>
         </Menu>
       </CardActions>

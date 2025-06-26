@@ -28,23 +28,30 @@ import categories from "@/lib/productsCategories";
 import Image from "next/image";
 import Link from "next/link";
 import { useCartStore } from "@/app/stores/cartStore";
+import { useRouter } from "next/navigation";
 
 export default function HeaderActions({ products }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [filtered, setFiltered] = useState([]);
   const searchRef = useRef();
   const { cart, removeFromCart, clearCart } = useCartStore();
-  const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-
-  const groupedProducts = Object.values(
-    products.reduce((acc, product) => {
-      const key = product.product;
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(product);
-      return acc;
-    }, {})
+  const total = cart.reduce(
+    (acc, item) => acc + item.price * (1 - item.discount / 100) * item.quantity,
+    0
   );
+
+  const groupedProducts = products
+    ? Object.values(
+        products?.reduce((acc, product) => {
+          const key = product.product;
+          if (!acc[key]) acc[key] = [];
+          acc[key].push(product);
+          return acc;
+        }, {})
+      )
+    : [];
 
   useEffect(() => {
     if (open === "menu") {
@@ -160,7 +167,10 @@ export default function HeaderActions({ products }) {
                   <ListItem disablePadding key={index}>
                     <ListItemButton
                       sx={{ display: "flex", gap: "1rem" }}
-                      onClick={() => setOpen(false)}
+                      onClick={() => {
+                        setOpen(false);
+                        router.push(`/producto/${variants[0].id}`);
+                      }}
                     >
                       <Box
                         sx={{
@@ -328,7 +338,12 @@ export default function HeaderActions({ products }) {
                         Cantidad: {item.quantity}
                       </Typography>
                       <Typography variant="body2" fontWeight="bold">
-                        Subtotal: ${item.price * item.quantity}
+                        Subtotal: $
+                        {(
+                          item.price *
+                          (1 - item.discount / 100) *
+                          item.quantity
+                        ).toFixed(2)}
                       </Typography>
                     </Box>
 
@@ -350,15 +365,17 @@ export default function HeaderActions({ products }) {
             {/* Total y acción */}
             {cart.length > 0 && (
               <Box sx={{ padding: 2 }}>
-                <Typography variant="h6">Total: ${total}</Typography>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                  sx={{ mt: 2 }}
-                >
-                  Finalizar compra
-                </Button>
+                <Typography variant="h6">Total: ${total.toFixed(2)}</Typography>
+                <Link href="/pago">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    sx={{ mt: 2 }}
+                  >
+                    Finalizar compra
+                  </Button>
+                </Link>
               </Box>
             )}
           </List>
