@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabaseServer";
 import { Typography } from "@mui/material";
 import ProductList from "@/components/client/ProductList";
-
 export default async function Home() {
   const supabase = await createClient();
   const { data: products } = await supabase

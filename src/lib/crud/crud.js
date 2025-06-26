@@ -34,6 +34,8 @@ export function createActions(
           ...newRow,
           product: row.product || "",
           category: row.category || "",
+          subcategory: row.subcategory || "",
+          stock: row.stock || "",
           images: row.images || "",
         };
       }

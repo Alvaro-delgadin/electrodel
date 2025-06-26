@@ -19,7 +19,7 @@ export default function ProductList({ products }) {
         alignItems: "center",
         justifyContent: "space-around",
         flexWrap: "wrap",
-        gap: 2,
+        gap: "2rem",
       }}
     >
       {groupedProducts?.length ? (

@@ -124,7 +124,7 @@ export default function ProductCard({ productName, variants }) {
   return (
     <Card
       sx={{
-        width: "18rem",
+        width: "16rem",
         bgcolor: "#f5f5f5",
         transition: "filter 0.3s ease",
         filter: "brightness(1)",
@@ -140,11 +140,12 @@ export default function ProductCard({ productName, variants }) {
       >
         <Box
           sx={{
-            maxWidth: "16rem",
+            maxWidth: "15rem",
             width: "100%",
             aspectRatio: "1/1",
             borderRadius: 2,
             overflow: "hidden",
+            bgcolor: "#fff",
             marginInline: "auto",
           }}
         >

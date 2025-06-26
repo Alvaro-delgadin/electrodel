@@ -5,6 +5,7 @@ import ThemeRegistry from "@/components/client/ThemeRegistry";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { createClient } from "@/lib/supabaseServer";
 import WhatsApp from "@/components/client/Whatsapp";
+import ClarityTracker from "@/components/client/ClaritytTacker";
 export const metadata = {
   title: "Electricidad e Iluminación | Electrodel",
   description:
@@ -52,6 +53,7 @@ export default async function ClientLayout({ children }) {
   return (
     <AppRouterCacheProvider>
       <ThemeRegistry>
+        <ClarityTracker />
         <Header logo={brand?.logo} products={products} />
         {children}
         <WhatsApp whatsapp={brand?.whatsapp} />
