@@ -204,7 +204,7 @@ export default function ProductsTable() {
     },
     {
       field: "color",
-      headerName: "Color",
+      headerName: "Color (luz)",
       type: "singleSelect",
       nullable: true,
       width: "150",

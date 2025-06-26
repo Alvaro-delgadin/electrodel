@@ -25,24 +25,16 @@ export default function ProductDetail({ selected, variants }) {
   const hasColor = variants.some((v) => !!v.color);
   const hasWatts = variants.some((v) => !!v.watts);
 
-  const filteredColors = [
-    ...new Set(
-      variants
-        .filter((v) => !watts || v.watts === Number(watts))
-        .map((v) => v.color)
-    ),
-  ];
-  const filteredWatts = [
-    ...new Set(
-      variants.filter((v) => !color || v.color === color).map((v) => v.watts)
-    ),
-  ];
+  const filteredColors = [...new Set(variants.map((v) => v.color))];
+  const filteredWatts = [...new Set(variants.map((v) => v.watts))];
 
-  const selectedVariant = variants.find(
-    (v) =>
-      (!hasColor || v.color === color) &&
-      (!hasWatts || v.watts === Number(watts))
-  );
+  const selectedVariant = variants.find((v) => {
+    if (!hasColor && !hasWatts) return true;
+    if (hasColor && hasWatts)
+      return v.color === color && v.watts === Number(watts);
+    if (hasColor) return v.color === color;
+    if (hasWatts) return v.watts === Number(watts);
+  });
 
   useEffect(() => {
     if (!hasColor && !hasWatts && variants.length === 1) {
@@ -172,7 +164,7 @@ export default function ProductDetail({ selected, variants }) {
         </Typography>
 
         {selectedVariant ? (
-          <>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
             <Typography component="h1" variant="h4">
               ${formatPrice(finalPrice)}
             </Typography>
@@ -201,9 +193,9 @@ export default function ProductDetail({ selected, variants }) {
                 </Box>
               </Box>
             )}
-          </>
+          </Box>
         ) : (
-          <Typography variant="h6" color="error" sx={{ m: "0.7rem 0" }}>
+          <Typography variant="h6" color="error">
             No hay stock para esta combinación.
           </Typography>
         )}
