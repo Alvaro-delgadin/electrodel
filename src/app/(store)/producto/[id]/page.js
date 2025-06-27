@@ -21,7 +21,7 @@ export default async function ProductPage({ params }) {
   const { data: variants } = await supabase
     .from("products")
     .select("*")
-    .eq("product", selected.product)
+    .ilike("product", selected.product)
     .eq("active", true);
 
   return (

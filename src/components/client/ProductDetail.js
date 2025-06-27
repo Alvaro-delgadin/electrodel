@@ -204,7 +204,7 @@ export default function ProductDetail({ selected, variants }) {
           {selected.category} — {selected.subcategory}
         </Typography>
 
-        {selectedVariant ? (
+        {selectedVariant?.description ? (
           <>
             <Typography component="p" variant="body" sx={{ mt: 1 }}>
               Descripción:

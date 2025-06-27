@@ -1,17 +1,9 @@
 import { Typography, Box } from "@mui/material";
 import { Inventory2Outlined } from "@mui/icons-material";
 import ProductCard from "./ProductCard";
-
+import groupProducts from "@/lib/client/utils/groupProducts";
 export default function ProductList({ products }) {
-  const groupedProducts = Object.values(
-    products.reduce((acc, product) => {
-      const key = product.product;
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(product);
-      return acc;
-    }, {})
-  );
-
+  const groupedProducts = groupProducts(products);
   return (
     <Box
       sx={{
