@@ -44,6 +44,7 @@ export default function Admin() {
         "--colors-inputBorderFocus": "#000",
         "--colors-inputPlaceholder": "var(--font)",
         "--fontSizes-baseButtonSize": "1rem",
+        "--colors-inputText": "#ffffff",
         "--space-buttonPadding": "1rem",
         "--colors-defaultButtonBackground": "white",
         "--colors-defaultButtonBackgroundHover": "#f5f5f5",
