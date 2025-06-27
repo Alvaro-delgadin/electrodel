@@ -35,7 +35,25 @@ export default function Admin() {
   }, [router]);
 
   return (
-    <main className={styles.main}>
+    <main
+      className={styles.main}
+      style={{
+        "--colors-brand": "#961116",
+        "--colors-brandAccent": "#000",
+        "--colors-brandButtonText": "var(--font)",
+        "--colors-inputBorderFocus": "#000",
+        "--colors-inputPlaceholder": "var(--font)",
+        "--fontSizes-baseButtonSize": "1rem",
+        "--space-buttonPadding": "1rem",
+        "--colors-defaultButtonBackground": "white",
+        "--colors-defaultButtonBackgroundHover": "#f5f5f5",
+        "--colors-defaultButtonBorder": "lightgray",
+        "--colors-defaultButtonText": "gray",
+        "--fonts-inputFontFamily": "Inter",
+        "--fontSizes-baseInputSize": "1rem",
+        "--space-inputPadding": "1rem",
+      }}
+    >
       <h1>Inicio de sesión</h1>
       <Auth
         supabaseClient={supabase}

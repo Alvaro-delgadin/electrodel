@@ -53,9 +53,12 @@ export default function EnviarReset() {
           onChange={(e) => setEmail(e.target.value)}
           required
           style={{
-            padding: "0.5rem",
+            padding: "1rem 1rem",
+            backgroundColor: "transparent",
+            color: "white",
             borderRadius: "4px",
             border: "1px solid #ccc",
+            fontSize: "1rem",
           }}
         />
         <button
@@ -67,6 +70,8 @@ export default function EnviarReset() {
             border: "none",
             borderRadius: "4px",
             cursor: "pointer",
+            fontSize: "1rem",
+            fontWeight: "bold",
           }}
         >
           Enviar

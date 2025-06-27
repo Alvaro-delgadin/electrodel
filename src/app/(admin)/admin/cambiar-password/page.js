@@ -70,10 +70,13 @@ export default function ResetPassword() {
             onChange={(e) => setPassword(e.target.value)}
             required
             style={{
-              padding: "0.5rem",
+              padding: "1rem 1rem",
+              backgroundColor: "transparent",
+              color: "white",
               borderRadius: "4px",
               border: "1px solid #ccc",
               width: "100%",
+              fontSize: "1rem",
             }}
           />
           <button
@@ -85,6 +88,8 @@ export default function ResetPassword() {
               border: "none",
               borderRadius: "4px",
               cursor: "pointer",
+              fontSize: "1rem",
+              fontWeight: "bold",
             }}
           >
             Guardar contraseña
