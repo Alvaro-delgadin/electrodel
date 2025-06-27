@@ -204,6 +204,18 @@ export default function ProductDetail({ selected, variants }) {
           {selected.category} — {selected.subcategory}
         </Typography>
 
+        {selectedVariant ? (
+          <>
+            <Typography component="p" variant="body" sx={{ mt: 1 }}>
+              Descripción:
+            </Typography>
+            <Typography color="text.secondary">
+              {selectedVariant.description}
+            </Typography>
+          </>
+        ) : (
+          ""
+        )}
         <Box sx={{ mt: 3 }}>
           {hasColor && (
             <>

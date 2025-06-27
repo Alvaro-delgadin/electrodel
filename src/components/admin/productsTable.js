@@ -267,6 +267,15 @@ export default function ProductsTable() {
       },
     },
     {
+      field: "description",
+      headerName: "Descripción",
+      type: "text",
+      nullable: true,
+      editable: true,
+      sortable: true,
+      filterable: true,
+    },
+    {
       field: "created_at",
       headerName: "Fecha de creación",
       type: "text",

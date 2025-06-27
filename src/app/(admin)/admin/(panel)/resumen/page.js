@@ -8,6 +8,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale } from "react-datepicker";
 import { es } from "date-fns/locale/es";
 import Image from "next/image";
+import { Skeleton } from "@mui/material";
 registerLocale("es", es);
 
 // ✅ Crea fechas en hora local
@@ -102,12 +103,14 @@ export default function Dashboard() {
         <h1 className={styles.title}>Resumen</h1>
         <Status loading={loading} error={error} sync={sync} />
       </div>
-
-      <div
-        className={`${styles.datepickerContainer} ${loading ? "skeleton" : ""}`}
-      >
-        Fecha:
-        {!loading ? (
+      {loading ? (
+        <Skeleton
+          variant="rounded"
+          sx={{ height: "3rem", width: "100%", borderRadius: "0.5rem" }}
+        />
+      ) : (
+        <div className={styles.datepickerContainer}>
+          Fecha:
           <DatePicker
             selectsRange
             startDate={startDate}
@@ -128,41 +131,73 @@ export default function Dashboard() {
             placeholderText="Desde - Hasta"
             locale="es"
             maxDate={new Date()}
-            className={`${styles.datepicker} ${loading ? "skeleton" : ""}`}
+            className={styles.datepicker}
           />
-        ) : (
-          ""
-        )}
-      </div>
+        </div>
+      )}
 
       <div className={styles.cards}>
-        <div className={`${styles.card} ${loading ? "skeleton" : ""}`}>
-          <h2>Facturado</h2>
-          <p>
-            {summary?.sales?.total
-              ? new Intl.NumberFormat("es-AR", {
-                  style: "currency",
-                  currency: "ARS",
-                  minimumFractionDigits: 0,
-                }).format(summary?.sales?.total)
-              : "-"}
-          </p>
-        </div>
+        {loading ? (
+          <Skeleton
+            variant="rounded"
+            height={124}
+            width={240}
+            sx={{ borderRadius: "0.5rem" }}
+          />
+        ) : (
+          <div className={styles.card}>
+            <h2>Facturado</h2>
+            <p>
+              {summary?.sales?.total
+                ? new Intl.NumberFormat("es-AR", {
+                    style: "currency",
+                    currency: "ARS",
+                    minimumFractionDigits: 0,
+                  }).format(summary?.sales?.total)
+                : "-"}
+            </p>
+          </div>
+        )}
 
-        <div className={`${styles.card} ${loading ? "skeleton" : ""}`}>
-          <h2>Ventas</h2>
-          <p>{summary?.sales?.count ?? "-"}</p>
-        </div>
-
-        <div className={`${styles.card} ${loading ? "skeleton" : ""}`}>
-          <h2>Pedidos pendientes</h2>
-          <p>{summary?.pendingOrders ?? "-"}</p>
-        </div>
-
-        <div className={`${styles.card} ${loading ? "skeleton" : ""}`}>
-          <h2>Pedidos finalizados</h2>
-          <p>{summary?.finishedOrders ?? "-"}</p>
-        </div>
+        {loading ? (
+          <Skeleton
+            variant="rounded"
+            height={124}
+            width={240}
+            sx={{ borderRadius: "0.5rem" }}
+          />
+        ) : (
+          <div className={styles.card}>
+            <h2>Ventas</h2>
+            <p>{summary?.sales?.count ?? "-"}</p>
+          </div>
+        )}
+        {loading ? (
+          <Skeleton
+            variant="rounded"
+            height={124}
+            width={240}
+            sx={{ borderRadius: "0.5rem" }}
+          />
+        ) : (
+          <div className={styles.card}>
+            <h2>Pedidos pendientes</h2>
+            <p>{summary?.pendingOrders ?? "-"}</p>
+          </div>
+        )}
+        {loading ? (
+          <Skeleton
+            variant="rounded"
+            height={124}
+            width={240}
+            sx={{ borderRadius: "0.5rem" }}
+          />
+        ) : (
+          <div className={styles.card}>
+            <h2>Pedidos finalizados</h2>
+            <p>{summary?.finishedOrders ?? "-"}</p>
+          </div>
+        )}
       </div>
 
       <h2>Productos con bajo stock</h2>

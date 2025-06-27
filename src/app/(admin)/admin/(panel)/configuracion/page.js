@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import Status from "@/components/admin/Status";
 import Image from "next/image";
+import { Skeleton } from "@mui/material";
 
 export default function Settings() {
   const [sync, setSync] = useState(false);
@@ -158,33 +159,41 @@ export default function Settings() {
         <Status sync={sync} loading={loading} error={error} />
       </div>
       <h2 className={styles.inputTitle}>Logo</h2>
-      <label
-        className={`${!loading ? styles.logoContainer : ""} ${
-          loading ? "skeleton" : ""
-        }`}
-      >
-        {logoPath ? (
-          <Image
-            src={logoPath}
-            className={styles.logo}
-            alt=""
-            width={120}
-            height={120}
-            style={{ objectFit: "contain" }}
-          />
-        ) : (
-          ""
-        )}
-        <input
-          onChange={handleFileChange}
-          type="file"
-          className={styles.inputFile}
-          accept="image/*"
-          disabled={loading}
+      {loading ? (
+        <Skeleton
+          variant="rounded"
+          sx={{ borderRadius: "1rem", height: "10rem", width: "10rem" }}
         />
-      </label>
+      ) : (
+        <label className={styles.logoContainer}>
+          {logoPath ? (
+            <Image
+              src={logoPath}
+              className={styles.logo}
+              alt=""
+              width={120}
+              height={120}
+              style={{ objectFit: "contain" }}
+            />
+          ) : (
+            ""
+          )}
+          <input
+            onChange={handleFileChange}
+            type="file"
+            className={styles.inputFile}
+            accept="image/*"
+            disabled={loading}
+          />
+        </label>
+      )}
       <h2 className={styles.inputTitle}>WhatsApp</h2>
-      <div className={loading ? "skeleton" : ""}>
+      {loading ? (
+        <Skeleton
+          variant="rounded"
+          sx={{ width: "20rem", height: "3rem", borderRadius: "0.5rem" }}
+        />
+      ) : (
         <input
           id="whatsapp"
           onChange={(e) => setWhatsapp(e.target.value)}
@@ -198,9 +207,14 @@ export default function Settings() {
           className={styles.inputText}
           disabled={loading}
         />
-      </div>
+      )}
       <h2 className={styles.inputTitle}>Dirección</h2>
-      <div className={loading ? "skeleton" : ""}>
+      {loading ? (
+        <Skeleton
+          variant="rounded"
+          sx={{ width: "20rem", height: "3rem", borderRadius: "0.5rem" }}
+        />
+      ) : (
         <input
           id="location"
           onChange={(e) => setLocation(e.target.value)}
@@ -214,9 +228,14 @@ export default function Settings() {
           type="text"
           disabled={loading}
         />
-      </div>
+      )}
       <h2 className={styles.inputTitle}>Horario</h2>
-      <div className={loading ? "skeleton" : ""}>
+      {loading ? (
+        <Skeleton
+          variant="rounded"
+          sx={{ width: "20rem", height: "3rem", borderRadius: "0.5rem" }}
+        />
+      ) : (
         <input
           id="schedule"
           onChange={(e) => setSchedule(e.target.value)}
@@ -230,16 +249,26 @@ export default function Settings() {
           type="text"
           disabled={loading}
         />
-      </div>
-      <button
-        onClick={handleSubmit}
-        className={`${styles.uploadBtn} ${error ? styles.error : ""} ${
-          loading || dataUpdatingRef.current ? "skeleton" : ""
-        }`}
-        disabled={loading || dataUpdatingRef.current}
-      >
-        Guardar
-      </button>
+      )}
+      {loading || dataUpdatingRef.current ? (
+        <Skeleton
+          variant="rounded"
+          sx={{
+            width: "20rem",
+            height: "3rem",
+            borderRadius: "0.5rem",
+            mt: "1rem",
+          }}
+        />
+      ) : (
+        <button
+          onClick={handleSubmit}
+          className={`${styles.uploadBtn} ${error ? styles.error : ""}`}
+          disabled={loading || dataUpdatingRef.current}
+        >
+          Guardar
+        </button>
+      )}
     </main>
   );
 }
