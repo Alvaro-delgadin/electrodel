@@ -1,4 +1,4 @@
-import { Box, Divider, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import Image from "next/image";
 
 export default function Footer({ logo, location, schedule }) {
@@ -14,13 +14,17 @@ export default function Footer({ logo, location, schedule }) {
         flexWrap: "wrap",
       }}
     >
-      <Image
-        src={logo}
-        height={100}
-        width={150}
-        alt="Electrodel - Electricidad e Iluminación"
-        style={{ objectFit: "contain" }}
-      />
+      {logo ? (
+        <Image
+          src={logo}
+          height={100}
+          width={150}
+          alt="Electrodel - Electricidad e Iluminación"
+          style={{ objectFit: "contain" }}
+        />
+      ) : (
+        ""
+      )}
       <Box
         sx={{
           display: "flex",

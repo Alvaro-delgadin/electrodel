@@ -209,6 +209,7 @@ export default function ProductsTable() {
       nullable: true,
       width: "150",
       editable: true,
+      sortable: true,
       valueOptions: [
         { value: "Cálido", label: "🟠 Cálido" },
         { value: "Frío", label: "🔵 Frío" },
