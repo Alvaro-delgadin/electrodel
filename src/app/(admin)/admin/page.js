@@ -58,6 +58,12 @@ export default function Admin() {
           },
         }}
       />
+      <p style={{ marginTop: "1rem" }}>
+        ¿Olvidaste tu contraseña?{" "}
+        <a href="/admin/enviar-email" style={{ color: "#ec3237" }}>
+          Recuperar
+        </a>
+      </p>
     </main>
   );
 }
