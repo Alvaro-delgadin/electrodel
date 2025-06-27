@@ -21,16 +21,20 @@ export default function Footer({ logo, location, schedule }) {
         alt="Electrodel - Electricidad e Iluminación"
         style={{ objectFit: "contain" }}
       />
-      <Box sx={{ maxWidth: { xs: "12rem" } }}>
-        <Typography>Dirección: {location}</Typography>
-        <Divider
-          sx={{
-            bgcolor: "transparent",
-            borderColor: "transparent",
-            margin: "0.5rem 0",
-          }}
-        />
-        <Typography>Horarios de atención: {schedule}</Typography>
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: { xs: "2rem", sm: "1rem" },
+          maxWidth: { xs: "10rem", md: "unset" },
+        }}
+      >
+        <Typography sx={{ maxWidth: "16rem" }}>
+          Dirección: {location}
+        </Typography>
+        <Typography sx={{ maxWidth: "16rem" }}>
+          Horarios de atención: {schedule}
+        </Typography>
       </Box>
     </Box>
   );

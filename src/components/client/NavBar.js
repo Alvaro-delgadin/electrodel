@@ -40,7 +40,8 @@ export default function NavBar() {
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
-                color: "black",
+                color: "white",
+                fontSize: "1rem",
               }}
             >
               {iconsInOrder[index]}

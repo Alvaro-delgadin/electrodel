@@ -9,7 +9,7 @@ export default function Header({ logo, products }) {
     <AppBar
       position="sticky"
       sx={{
-        backgroundColor: "#f5f5f5",
+        backgroundColor: "#ec3237",
         boxShadow: "none",
       }}
     >
@@ -20,17 +20,25 @@ export default function Header({ logo, products }) {
           placeItems: "center",
           justifyContent: { xs: "space-between", lg: "unset" },
           gap: "1rem",
+          p: "0.5rem",
         }}
       >
         <Link href="/">
-          <Box sx={{ height: "100%", width: "auto" }}>
+          <Box
+            sx={{
+              height: "5rem",
+              p: "0.8rem 1rem",
+              borderRadius: "0.5rem",
+              bgcolor: "#f5f5f5",
+            }}
+          >
             {logo ? (
               <Image
                 src={logo}
-                width={140}
-                height={100}
+                width={100}
+                height={80}
                 alt="Logo"
-                style={{ objectFit: "contain" }}
+                style={{ objectFit: "contain", height: "100%", width: "auto" }}
               />
             ) : (
               ""

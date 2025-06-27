@@ -90,29 +90,31 @@ export default function HeaderActions({ products }) {
           setOpen("menu");
         }}
       >
-        <Search sx={{ fontSize: "2rem" }} />
+        <Search sx={{ fontSize: "2rem", color: "white" }} />
       </IconButton>
       <IconButton aria-label="cart" onClick={() => setOpen("cart")}>
         <Badge
           badgeContent={cart?.length}
-          color="primary"
           sx={{
             "& .MuiBadge-badge": {
               fontSize: "medium",
               height: "1.5rem",
               width: "1.5rem",
               borderRadius: "1rem",
+              bgcolor: "black",
+              color: "white",
+              fontWeight: "bold",
             },
           }}
         >
-          <ShoppingCart sx={{ fontSize: "1.8rem" }} />
+          <ShoppingCart sx={{ fontSize: "1.8rem", color: "white" }} />
         </Badge>
       </IconButton>
       <IconButton
         aria-label="user"
         sx={{ display: { xs: "none", sm: "flex" } }}
       >
-        <Person sx={{ fontSize: "2rem" }} />
+        <Person sx={{ fontSize: "2rem", color: "white" }} />
       </IconButton>
       <IconButton
         aria-label="Abrir menú"
@@ -121,7 +123,7 @@ export default function HeaderActions({ products }) {
         }}
         sx={{ display: { xs: "flex", lg: "none" } }}
       >
-        <Menu />
+        <Menu sx={{ color: "white", fontSize: "2rem" }} />
       </IconButton>
       <Drawer
         anchor="right"
