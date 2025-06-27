@@ -74,7 +74,7 @@ export default function EnviarReset() {
             fontWeight: "bold",
           }}
         >
-          Enviar
+          {loading}
         </button>
         {mensaje && <p style={{ color: "lightgreen" }}>{mensaje}</p>}
         {error && <p style={{ color: "red" }}>{error}</p>}
