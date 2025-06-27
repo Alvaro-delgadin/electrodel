@@ -38,7 +38,7 @@ export default function Admin() {
     <main
       className={styles.main}
       style={{
-        "--colors-brand": "#961116",
+        "--colors-brand": "#ec3237",
         "--colors-brandAccent": "#000",
         "--colors-brandButtonText": "var(--font)",
         "--colors-inputBorderFocus": "#000",
