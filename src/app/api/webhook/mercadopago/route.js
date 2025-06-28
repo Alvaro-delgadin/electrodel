@@ -1,12 +1,8 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY // Usa la clave con permisos para insertar
-);
+import { createClient } from "@/lib/supabaseServer";
 
 export async function POST(req) {
+  const supabase = await createClient();
   try {
     const body = await req.json();
     const paymentId = body?.data?.id;
