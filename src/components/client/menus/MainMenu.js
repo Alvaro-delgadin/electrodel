@@ -1,5 +1,5 @@
 "use client";
-import { Close, ArrowRight } from "@mui/icons-material";
+import { Close, ArrowRight, QuestionAnswer } from "@mui/icons-material";
 import { useState, useRef, useEffect } from "react";
 import {
   Box,
@@ -110,6 +110,19 @@ export default function MainMenu({ setOpen, products }) {
         })}
       {!query ? (
         <>
+          <ListItem
+            sx={{ paddingLeft: 0, cursor: "pointer" }}
+            onClick={() => {
+              setOpen(false);
+              router.push("/preguntas-frecuentes");
+            }}
+          >
+            <IconButton>
+              <QuestionAnswer sx={{ color: "#ec3237" }} />
+            </IconButton>
+            <ListItemText primary="Preguntas frecuentes" />
+            <ArrowRight />
+          </ListItem>
           <ListItem>
             <ListItemText primary="Categorías" />
           </ListItem>

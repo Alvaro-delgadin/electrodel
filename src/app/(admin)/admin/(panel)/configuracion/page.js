@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import Status from "@/components/admin/Status";
 import Image from "next/image";
-import { Skeleton } from "@mui/material";
+import { Skeleton, Box, Button } from "@mui/material";
 
 export default function Settings() {
   const [sync, setSync] = useState(false);
@@ -15,6 +15,7 @@ export default function Settings() {
   const [whatsapp, setWhatsapp] = useState("");
   const [location, setLocation] = useState("");
   const [schedule, setSchedule] = useState("");
+  const [faqs, setFaqs] = useState([]);
   const [data, setData] = useState(undefined);
   const rowId = "45645c26-d123-42a1-aa25-9d5a0bf52f33";
   const dataUpdatingRef = useRef(false);
@@ -32,6 +33,7 @@ export default function Settings() {
         setWhatsapp(data.whatsapp);
         setLocation(data.location);
         setSchedule(data.schedule);
+        setFaqs(data.faqs || []);
         setLoading(false);
       } else {
         setError(error.code);
@@ -138,6 +140,25 @@ export default function Settings() {
       }
       setData((prev) => ({ ...prev, schedule: schedule }));
     }
+    if (JSON.stringify(data.faqs || []) !== JSON.stringify(faqs)) {
+      setSync("Actualizando preguntas frecuentes");
+      const { error: updateError } = await supabase
+        .from("settings")
+        .update({ faqs })
+        .eq("id", rowId);
+
+      if (updateError) {
+        setSync(false);
+        setError(
+          "Error al actualizar preguntas frecuentes: " + updateError.code
+        );
+        dataUpdatingRef.current = false;
+        return;
+      }
+
+      setData((prev) => ({ ...prev, faqs }));
+    }
+
     setSync(false);
     dataUpdatingRef.current = false;
   };
@@ -155,7 +176,7 @@ export default function Settings() {
   return (
     <main className={styles.main}>
       <div className={styles.titleContainer}>
-        <h1 className={styles.title}>Configuración</h1>
+        <h1 className={styles.title}>Información del negocio</h1>
         <Status sync={sync} loading={loading} error={error} />
       </div>
       <h2 className={styles.inputTitle}>Logo</h2>
@@ -194,19 +215,33 @@ export default function Settings() {
           sx={{ width: "20rem", height: "3rem", borderRadius: "0.5rem" }}
         />
       ) : (
-        <input
-          id="whatsapp"
-          onChange={(e) => setWhatsapp(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSubmit(e.target.value);
-            }
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            bgcolor: "#303030",
+            borderRadius: "0.5rem",
+            pl: "1rem",
+            gap: "0.5rem",
+            fontSize: "1.1rem",
           }}
-          value={whatsapp}
-          type="text"
-          className={styles.inputText}
-          disabled={loading}
-        />
+        >
+          +54
+          <input
+            id="whatsapp"
+            style={{ paddingLeft: "0.5rem" }}
+            onChange={(e) => setWhatsapp(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit(e.target.value);
+              }
+            }}
+            value={whatsapp}
+            type="text"
+            className={styles.inputText}
+            disabled={loading}
+          />
+        </Box>
       )}
       <h2 className={styles.inputTitle}>Dirección</h2>
       {loading ? (
@@ -250,6 +285,88 @@ export default function Settings() {
           disabled={loading}
         />
       )}
+      <h2 className={styles.inputTitle}>Preguntas Frecuentes</h2>
+      {loading ? (
+        <Skeleton
+          variant="rounded"
+          sx={{
+            width: "20rem",
+            height: "3rem",
+            borderRadius: "0.5rem",
+            mt: "1rem",
+          }}
+        />
+      ) : (
+        <Box sx={{ bgcolor: "#303030", borderRadius: "0.5rem", p: "1rem" }}>
+          {faqs.map((faq, index) => (
+            <Box
+              key={index}
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.5rem",
+                border: "1px solid #555",
+                borderRadius: "0.5rem",
+                padding: "0rem",
+                marginBottom: "1rem",
+              }}
+            >
+              <input
+                type="text"
+                placeholder="Pregunta"
+                value={faq.question}
+                onChange={(e) => {
+                  const updated = [...faqs];
+                  updated[index].question = e.target.value;
+                  setFaqs(updated);
+                }}
+                className={styles.inputText}
+                style={{ backgroundColor: "var(--background)" }}
+              />
+              <textarea
+                placeholder="Respuesta"
+                value={faq.answer}
+                onChange={(e) => {
+                  const updated = [...faqs];
+                  updated[index].answer = e.target.value;
+                  setFaqs(updated);
+                }}
+                className={styles.inputText}
+                style={{
+                  minHeight: "4rem",
+                  backgroundColor: "var(--background)",
+                }}
+              />
+              <Button
+                onClick={() => {
+                  const updated = [...faqs];
+                  updated.splice(index, 1);
+                  setFaqs(updated);
+                }}
+                sx={{
+                  alignSelf: "flex-end",
+                  color: "#ec1000",
+                  textTransform: "unset",
+                  p: "0rem 0.5rem",
+                  "&:hover": {
+                    backgroundColor: "#ec3237",
+                  },
+                }}
+              >
+                Eliminar
+              </Button>
+            </Box>
+          ))}
+          <button
+            onClick={() => setFaqs([...faqs, { question: "", answer: "" }])}
+            className={styles.uploadBtn}
+            style={{ width: "100%", maxWidth: "unset" }}
+          >
+            + Agregar pregunta y respuesta frecuente
+          </button>
+        </Box>
+      )}
+
       {loading || dataUpdatingRef.current ? (
         <Skeleton
           variant="rounded"

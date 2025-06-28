@@ -1,5 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Footer({ logo, location, schedule }) {
   return (
@@ -39,6 +40,18 @@ export default function Footer({ logo, location, schedule }) {
         <Typography sx={{ maxWidth: "16rem" }}>
           Horarios de atención: {schedule}
         </Typography>
+        <Link
+          href="/preguntas-frecuentes"
+          style={{
+            color: "var(--pri)",
+            textDecoration: "underline",
+            maxWidth: "16rem",
+            width: "100%",
+            fontWeight: "bold",
+          }}
+        >
+          Preguntas frecuentes
+        </Link>
       </Box>
     </Box>
   );
