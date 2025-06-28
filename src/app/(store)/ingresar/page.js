@@ -51,6 +51,9 @@ export default function Ingresar() {
             variant="outlined"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") loginWithEmail();
+            }}
             disabled={loading}
             sx={{ mb: 3 }}
           />

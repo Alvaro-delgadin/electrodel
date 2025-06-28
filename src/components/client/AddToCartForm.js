@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import ProductCardMenu from "./menus/ProductCardMenu";
 import ProductDetailMenu from "./menus/ProductDetailMenu";
 import { useCartStore } from "@/app/stores/cartStore";
@@ -56,6 +56,24 @@ export default function AddToCartForm({
     ];
   };
 
+  const quantityInCart = cart
+    .filter((item) => item.id === selectedVariant?.id)
+    .reduce((sum, item) => sum + item.quantity, 0);
+
+  const maxAvailable = selectedVariant
+    ? selectedVariant.stock - quantityInCart
+    : 0;
+
+  const price = selectedVariant?.price || 0;
+
+  const discount = !isNaN(selectedVariant?.discount)
+    ? selectedVariant?.discount
+    : 0;
+
+  const priceWithDiscount = price * (1 - discount / 100);
+
+  const finalPrice =
+    quantity && !isNaN(quantity) ? priceWithDiscount * Number(quantity) : 0;
   useEffect(() => {
     if (
       variants.length > 0 &&
@@ -112,6 +130,36 @@ export default function AddToCartForm({
     });
   }, [variants, selected]);
 
+  const requiredAttributes = useMemo(() => {
+    return attributes.filter((attr) => {
+      const values = new Set(
+        variants
+          .map((v) => v[attr])
+          .filter((v) => v !== null && v !== undefined)
+      );
+      return values.size > 1;
+    });
+  }, [variants, attributes]);
+
+  const isDisabled = useMemo(() => {
+    if (!selectedVariant) return true;
+    if (Number(quantity) < 1 || Number(quantity) > maxAvailable) return true;
+    if (maxAvailable < 1) return true;
+
+    for (const attr of requiredAttributes) {
+      const val = getSelectedValue(attr);
+      if (!val || val.toString().trim() === "") return true;
+    }
+
+    return false;
+  }, [
+    selectedVariant,
+    quantity,
+    maxAvailable,
+    requiredAttributes,
+    attributes.map(getSelectedValue),
+  ]);
+
   const handleReset = () => {
     const reset = {};
     attributes.forEach((attr) => (reset[attr] = ""));
@@ -119,24 +167,6 @@ export default function AddToCartForm({
     setQuantity("1");
     setSelectedVariant(null);
   };
-  const quantityInCart = cart
-    .filter((item) => item.id === selectedVariant?.id)
-    .reduce((sum, item) => sum + item.quantity, 0);
-
-  const maxAvailable = selectedVariant
-    ? selectedVariant.stock - quantityInCart
-    : 0;
-
-  const price = selectedVariant?.price || 0;
-
-  const discount = !isNaN(selectedVariant?.discount)
-    ? selectedVariant?.discount
-    : 0;
-
-  const priceWithDiscount = price * (1 - discount / 100);
-
-  const finalPrice =
-    quantity && !isNaN(quantity) ? priceWithDiscount * Number(quantity) : 0;
   const handleAddToCart = () => {
     if (selectedVariant && Number(quantity) > 0) {
       const item = {
@@ -148,17 +178,6 @@ export default function AddToCartForm({
       if (mode === "card") handleClose();
     }
   };
-  const isDisabled =
-    !selectedVariant ||
-    Number(quantity) < 1 ||
-    Number(quantity) > maxAvailable ||
-    maxAvailable < 1 ||
-    attributes.some(
-      (attr) =>
-        variants.some((v) => v[attr] !== undefined && v[attr] !== null) &&
-        !getSelectedValue(attr)
-    );
-
   const props = {
     anchorEl,
     open,
