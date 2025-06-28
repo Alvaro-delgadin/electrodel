@@ -43,7 +43,7 @@ export async function POST(req) {
       .from("orders")
       .insert({
         client: payerEmail,
-        status: "approved",
+        status: "pending",
         total,
         active: true,
       })
