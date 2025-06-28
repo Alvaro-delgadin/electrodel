@@ -37,6 +37,8 @@ export default function CuentaLayout({ children }) {
               role: "client",
             });
           if (insertError) {
+            console.log(insertError.message);
+
             router.replace("/ingresar");
             return;
           }
