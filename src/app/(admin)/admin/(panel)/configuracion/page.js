@@ -55,134 +55,98 @@ export default function Settings() {
     return () => clearTimeout(timeout);
   }, [data]);
 
-  const handleSubmit = async () => {
-    if (dataUpdatingRef.current) {
-      return;
-    }
+  const handleSubmit = async (updatedFields = {}) => {
+    if (dataUpdatingRef.current) return;
 
     setError(null);
     dataUpdatingRef.current = true;
+
+    const updates = {};
+
+    // Whatsapp
+    const newWhatsapp = updatedFields.whatsapp ?? whatsapp;
+    if (data.whatsapp !== newWhatsapp) {
+      updates.whatsapp = newWhatsapp;
+    }
+
+    // Location
+    const newLocation = updatedFields.location ?? location;
+    if (data.location !== newLocation) {
+      updates.location = newLocation;
+    }
+
+    // Schedule
+    const newSchedule = updatedFields.schedule ?? schedule;
+    if (data.schedule !== newSchedule) {
+      updates.schedule = newSchedule;
+    }
+
+    // Faqs
+    const newFaqs = updatedFields.faqs ?? faqs;
+    if (JSON.stringify(data.faqs || []) !== JSON.stringify(newFaqs)) {
+      updates.faqs = newFaqs;
+    }
+
+    // Banner
+    if (
+      "banner" in updatedFields
+        ? JSON.stringify(data.banner || {}) !==
+          JSON.stringify(updatedFields.banner)
+        : JSON.stringify(data.banner || {}) !== JSON.stringify(banner)
+    ) {
+      updates.banner = updatedFields.banner ?? banner;
+    }
+
+    // Subida de logo
     if (logoFile) {
       setSync("Subiendo logo");
 
       const fileExt = logoFile.name.split(".").pop();
       const fileName = `logo_${Date.now()}.${fileExt}`;
       const filePath = `logos/${fileName}`;
+
       const { error: uploadError } = await supabase.storage
         .from("assets")
         .upload(filePath, logoFile);
 
       if (uploadError) {
         setSync(false);
-        setError("Error al subir el logo: " + updateError.code);
+        setError("Error al subir el logo: " + uploadError.code);
         dataUpdatingRef.current = false;
         return;
       }
+
       setSync("Actualizando logo");
-      const { data } = supabase.storage.from("assets").getPublicUrl(filePath);
-      const publicUrl = data.publicUrl;
-      const { error: updateError } = await supabase
-        .from("settings")
-        .update({ logo: publicUrl })
-        .eq("id", rowId);
+      const { data: urlData } = supabase.storage
+        .from("assets")
+        .getPublicUrl(filePath);
+      const publicUrl = urlData.publicUrl;
 
-      if (updateError) {
-        setSync(false);
-        setError("Error al actualizar el logo: " + updateError.code);
-        dataUpdatingRef.current = false;
-        return;
-      }
+      updates.logo = publicUrl;
       setLogoFile(undefined);
-      setData((prev) => ({ ...prev, logo: filePath }));
     }
 
-    if (data.whatsapp !== whatsapp) {
-      setSync("Actualizando whatsapp");
+    const keys = Object.keys(updates);
+    if (keys.length > 0) {
+      setSync("Actualizando datos...");
       const { error: updateError } = await supabase
         .from("settings")
-        .update({ whatsapp: whatsapp })
+        .update(updates)
         .eq("id", rowId);
 
       if (updateError) {
         setSync(false);
-        setError("Error al actualizar WhatsApp" + updateError.code);
+        setError("Error al actualizar: " + updateError.code);
         dataUpdatingRef.current = false;
         return;
       }
 
-      setData((prev) => ({ ...prev, whatsapp: whatsapp }));
-    }
-
-    if (data.location !== location) {
-      setSync("Actualizando dirección");
-      const { error: updateError } = await supabase
-        .from("settings")
-        .update({ location: location })
-        .eq("id", rowId);
-
-      if (updateError) {
-        setSync(false);
-        setError("Error al actualizar la dirección" + updateError.code);
-        dataUpdatingRef.current = false;
-        return;
-      }
-      setData((prev) => ({ ...prev, location: location }));
-    }
-
-    if (data.schedule !== schedule) {
-      setSync("Actualizando horario");
-      const { error: updateError } = await supabase
-        .from("settings")
-        .update({ schedule: schedule })
-        .eq("id", rowId);
-
-      if (updateError) {
-        setSync(false);
-        setError("Error al actualizar el horario" + updateError.code);
-        dataUpdatingRef.current = false;
-        return;
-      }
-      setData((prev) => ({ ...prev, schedule: schedule }));
-    }
-    if (JSON.stringify(data.faqs || []) !== JSON.stringify(faqs)) {
-      setSync("Actualizando preguntas frecuentes");
-      const { error: updateError } = await supabase
-        .from("settings")
-        .update({ faqs })
-        .eq("id", rowId);
-
-      if (updateError) {
-        setSync(false);
-        setError(
-          "Error al actualizar preguntas frecuentes: " + updateError.code
-        );
-        dataUpdatingRef.current = false;
-        return;
-      }
-
-      setData((prev) => ({ ...prev, faqs }));
-    }
-    if (JSON.stringify(data.banner || {}) !== JSON.stringify(banner)) {
-      setSync("Actualizando banner promocional");
-      const { error: updateError } = await supabase
-        .from("settings")
-        .update({ banner })
-        .eq("id", rowId);
-
-      if (updateError) {
-        setSync(false);
-        setError("Error al actualizar el banner: " + updateError.code);
-        dataUpdatingRef.current = false;
-        return;
-      }
-
-      setData((prev) => ({ ...prev, banner }));
+      setData((prev) => ({ ...prev, ...updates }));
     }
 
     setSync(false);
     dataUpdatingRef.current = false;
   };
-
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith("image/")) {
@@ -253,7 +217,7 @@ export default function Settings() {
             onChange={(e) => setWhatsapp(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                handleSubmit(e.target.value);
+                handleSubmit({ whatsapp: e.target.value });
               }
             }}
             value={whatsapp}
@@ -276,7 +240,7 @@ export default function Settings() {
           onChange={(e) => setLocation(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              handleSubmit(e.target.value);
+              handleSubmit({ location: e.target.value });
             }
           }}
           value={location}
@@ -297,7 +261,7 @@ export default function Settings() {
           onChange={(e) => setSchedule(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              handleSubmit(e.target.value);
+              handleSubmit({ schedule: e.target.value });
             }
           }}
           value={schedule}
@@ -330,7 +294,9 @@ export default function Settings() {
               checked={banner.active}
               value={banner.active}
               onChange={(e) => {
-                setBanner((prev) => ({ ...prev, active: e.target.checked }));
+                const updated = { ...banner, active: e.target.checked };
+                setBanner(updated);
+                handleSubmit({ banner: updated });
               }}
               color="primary"
             />
@@ -339,12 +305,15 @@ export default function Settings() {
             placeholder="Mensaje del banner"
             type="text"
             value={banner.message}
-            onChange={(e) =>
-              setBanner((prev) => ({ ...prev, message: e.target.value }))
-            }
+            onChange={(e) => {
+              const updated = { ...banner, message: e.target.value };
+              setBanner(updated);
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                handleSubmit(e.target.value);
+                const updated = { ...banner, message: e.target.value };
+                setBanner(updated);
+                handleSubmit({ banner: updated });
               }
             }}
             className={styles.inputText}
@@ -391,9 +360,19 @@ export default function Settings() {
                 placeholder="Pregunta"
                 value={faq.question}
                 onChange={(e) => {
-                  const updated = [...faqs];
-                  updated[index].question = e.target.value;
+                  const updated = faqs.map((item, i) =>
+                    i === index ? { ...item, question: e.target.value } : item
+                  );
                   setFaqs(updated);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    const updated = faqs.map((item, i) =>
+                      i === index ? { ...item, question: e.target.value } : item
+                    );
+                    setFaqs(updated);
+                    handleSubmit({ faqs: updated });
+                  }
                 }}
                 className={styles.inputText}
                 style={{ backgroundColor: "var(--background)" }}
@@ -402,9 +381,20 @@ export default function Settings() {
                 placeholder="Respuesta"
                 value={faq.answer}
                 onChange={(e) => {
-                  const updated = [...faqs];
-                  updated[index].answer = e.target.value;
+                  const updated = faqs.map((item, i) =>
+                    i === index ? { ...item, answer: e.target.value } : item
+                  );
                   setFaqs(updated);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault(); // evita salto de línea
+                    const updated = faqs.map((item, i) =>
+                      i === index ? { ...item, answer: e.target.value } : item
+                    );
+                    setFaqs(updated);
+                    handleSubmit({ faqs: updated });
+                  }
                 }}
                 className={styles.inputText}
                 style={{

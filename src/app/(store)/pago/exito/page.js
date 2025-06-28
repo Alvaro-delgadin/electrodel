@@ -1,9 +1,16 @@
+"use client";
 import { Box, Typography, Button } from "@mui/material";
 import { ArrowBack, WhatsApp } from "@mui/icons-material";
 import Link from "next/link";
 import { createClient } from "@/lib/supabaseServer";
-
+import { useEffect } from "react";
+import { useCartStore } from "@/app/stores/cartStore";
 export default async function SuccessPage() {
+  const clearCart = useCartStore((state) => state.clearCart);
+
+  useEffect(() => {
+    clearCart();
+  }, []);
   const supabase = await createClient();
   const {
     data: { whatsapp },
