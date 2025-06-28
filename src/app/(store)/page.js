@@ -12,7 +12,7 @@ export default async function Home() {
     <main>
       <Typography
         component="h1"
-        sx={{ fontSize: { xs: "2rem", sm: "2.5rem" } }}
+        sx={{ fontSize: { xs: "2rem", sm: "2.5rem" }, m: "2rem 0" }}
       >
         Productos destacados
       </Typography>

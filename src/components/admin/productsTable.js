@@ -23,7 +23,6 @@ import {
 } from "@mui/icons-material";
 import { createActions } from "@/lib/crud/crud";
 import categories from "@/lib/productsCategories";
-
 export default function ProductsTable() {
   const [loading, setLoading] = useState(true);
   const [sync, setSync] = useState(false);
@@ -204,16 +203,12 @@ export default function ProductsTable() {
     },
     {
       field: "color",
-      headerName: "Color (luz)",
-      type: "singleSelect",
+      headerName: "Color",
+      type: "text",
       nullable: true,
       width: "150",
       editable: true,
       sortable: true,
-      valueOptions: [
-        { value: "Cálido", label: "🟠 Cálido" },
-        { value: "Frío", label: "🔵 Frío" },
-      ],
     },
     {
       field: "images",
@@ -270,6 +265,16 @@ export default function ProductsTable() {
     {
       field: "description",
       headerName: "Descripción",
+      type: "text",
+      nullable: true,
+      editable: true,
+      sortable: true,
+      filterable: true,
+      width: "250",
+    },
+    {
+      field: "brand",
+      headerName: "Marca",
       type: "text",
       nullable: true,
       editable: true,

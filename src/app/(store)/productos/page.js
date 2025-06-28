@@ -25,12 +25,17 @@ export default async function Products(props) {
 
   return (
     <main>
-      <Typography component="h1" variant="h4" color="inherit">
+      <Typography
+        component="h1"
+        variant="h4"
+        color="inherit"
+        sx={{ mt: "2rem" }}
+      >
         {subcategory ? subcategory : ""}
         {!subcategory && category ? category : ""}
         {!subcategory && !category ? "Todos los productos" : ""}
       </Typography>
-      <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
+      <Breadcrumbs aria-label="breadcrumb" sx={{ mb: "2rem" }}>
         <Link href="/" passHref>
           <Typography color="inherit">Inicio</Typography>
         </Link>

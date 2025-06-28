@@ -6,7 +6,6 @@ import AddToCartForm from "./AddToCartForm";
 
 export default function ProductDetail({ selected, variants }) {
   const [selectedImage, setSelectedImage] = useState(selected.images?.[0]);
-
   return (
     <Box
       sx={{
