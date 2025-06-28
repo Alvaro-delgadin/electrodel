@@ -17,23 +17,22 @@ export default function ProductCardMenu({
   handleClose,
   handleReset,
   handleAddToCart,
-  hasColor,
-  hasWatts,
-  hasAmpere,
-  filteredColors,
-  filteredWatts,
-  filteredAmperes,
-  color,
-  setColor,
-  watts,
-  setWatts,
-  ampere,
-  setAmpere,
+  attributes,
+  labelMap,
+  isDisabled,
+  attributesToShow,
+  getFilteredOptions,
+  getSelectedValue,
+  setSelectedValue,
+  variants,
   quantity,
   setQuantity,
   maxAvailable,
   selectedVariant,
   finalPrice,
+  discount,
+  priceWithDiscount,
+  loading,
 }) {
   return (
     <Menu
@@ -51,56 +50,41 @@ export default function ProductCardMenu({
           gap: 2,
         }}
       >
-        {hasColor && (
-          <FormControl fullWidth>
-            <InputLabel>Color</InputLabel>
-            <Select
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-              label="Color"
-            >
-              {filteredColors.map((c) => (
-                <MenuItem key={c} value={c}>
-                  {c}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )}
+        {attributesToShow.map((attr) => {
+          const options = getFilteredOptions(attr);
+          if (options.length === 0) return null; // extra seguridad
 
-        {hasWatts && (
-          <FormControl fullWidth>
-            <InputLabel>Potencia</InputLabel>
-            <Select
-              value={watts}
-              onChange={(e) => setWatts(e.target.value)}
-              label="Potencia"
-            >
-              {filteredWatts.map((w) => (
-                <MenuItem key={w} value={w}>
-                  {w}W
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )}
+          const labelMap = {
+            color: "Color",
+            watts: "Potencia",
+            ampere: "Corriente (A)",
+            voltage: "Voltaje (V)",
+          };
 
-        {hasAmpere && (
-          <FormControl fullWidth>
-            <InputLabel>Corriente (A)</InputLabel>
-            <Select
-              value={ampere}
-              onChange={(e) => setAmpere(e.target.value)}
-              label="Corriente"
-            >
-              {filteredAmperes.map((a) => (
-                <MenuItem key={a} value={a}>
-                  {a}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )}
+          return (
+            <FormControl key={attr} fullWidth>
+              <InputLabel>{labelMap[attr] || attr}</InputLabel>
+              <Select
+                value={getSelectedValue(attr) || ""}
+                onChange={(e) => setSelectedValue(attr, e.target.value)}
+                label={labelMap[attr] || attr}
+                size="small"
+              >
+                {options.map((opt) => (
+                  <MenuItem key={opt} value={opt}>
+                    {attr === "watts"
+                      ? `${opt}W`
+                      : attr === "ampere"
+                      ? `${opt}A`
+                      : attr === "voltage"
+                      ? `${opt}V`
+                      : opt}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          );
+        })}
         <TextField
           label="Cantidad"
           type="number"
@@ -143,14 +127,7 @@ export default function ProductCardMenu({
           color="primary"
           fullWidth
           onClick={handleAddToCart}
-          disabled={
-            !selectedVariant ||
-            Number(quantity) < 1 ||
-            Number(quantity) > maxAvailable ||
-            maxAvailable < 1 ||
-            (hasColor && !color) ||
-            (hasWatts && !watts)
-          }
+          disabled={isDisabled}
         >
           Confirmar
         </Button>

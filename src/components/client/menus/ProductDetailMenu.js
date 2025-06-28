@@ -11,18 +11,12 @@ import formatPrice from "@/lib/client/formatters/formatPrice";
 import { useRouter } from "next/navigation";
 export default function ProductDetailMenu({
   handleAddToCart,
-  hasColor,
-  hasWatts,
-  hasAmpere,
-  filteredColors,
-  filteredWatts,
-  filteredAmperes,
-  color,
-  setColor,
-  watts,
-  setWatts,
-  ampere,
-  setAmpere,
+  getFilteredOptions,
+  getSelectedValue,
+  setSelectedValue,
+  attributesToShow,
+  isDisabled,
+  labelMap,
   quantity,
   setQuantity,
   maxAvailable,
@@ -85,13 +79,6 @@ export default function ProductDetailMenu({
       ) : (
         ""
       )}
-      {!selectedVariant && !loading ? (
-        <Typography variant="h6" color="error">
-          No hay stock para esta combinación.
-        </Typography>
-      ) : (
-        ""
-      )}
 
       <Typography sx={{ mt: 1 }} color="text.secondary">
         {selectedVariant?.category} — {selectedVariant?.subcategory}
@@ -117,63 +104,41 @@ export default function ProductDetailMenu({
         ""
       )}
       <Box sx={{ mt: 3 }}>
-        {hasColor && (
-          <>
-            <Typography variant="subtitle2">Color</Typography>
-            <ToggleButtonGroup
-              exclusive
-              value={color}
-              onChange={(_, newColor) => setColor(newColor)}
-              sx={{ my: 1, flexWrap: "wrap", gap: 1 }}
-            >
-              {filteredColors.map((c) => (
-                <ToggleButton key={c} value={c}>
-                  {c}
-                </ToggleButton>
-              ))}
-            </ToggleButtonGroup>
-          </>
-        )}
+        {attributesToShow.map((attr) => {
+          const options = getFilteredOptions(attr);
+          if (options.length === 0) return null;
 
-        {hasWatts && (
-          <>
-            <Typography variant="subtitle2" sx={{ mt: 2 }}>
-              Potencia
-            </Typography>
-            <ToggleButtonGroup
-              exclusive
-              value={watts}
-              onChange={(_, newWatts) => setWatts(newWatts)}
-              sx={{ my: 1, flexWrap: "wrap", gap: 1 }}
-            >
-              {filteredWatts.map((w) => (
-                <ToggleButton key={w} value={w}>
-                  {w}W
-                </ToggleButton>
-              ))}
-            </ToggleButtonGroup>
-          </>
-        )}
+          const sortedOptions = [...options].sort((a, b) =>
+            typeof a === "number" ? a - b : a.localeCompare(b)
+          );
 
-        {hasAmpere && (
-          <>
-            <Typography variant="subtitle2" sx={{ mt: 2 }}>
-              Corriente (A)
-            </Typography>
-            <ToggleButtonGroup
-              exclusive
-              value={ampere}
-              onChange={(_, newAmpere) => setAmpere(newAmpere)}
-              sx={{ my: 1, flexWrap: "wrap", gap: 1 }}
-            >
-              {filteredAmperes.map((a) => (
-                <ToggleButton key={a} value={a}>
-                  {a}
-                </ToggleButton>
-              ))}
-            </ToggleButtonGroup>
-          </>
-        )}
+          return (
+            <Box key={attr} sx={{ mt: 2 }}>
+              <Typography variant="subtitle2">
+                {labelMap[attr] || attr}
+              </Typography>
+              <ToggleButtonGroup
+                exclusive
+                value={getSelectedValue(attr)}
+                onChange={(_, newValue) => setSelectedValue(attr, newValue)}
+                sx={{ my: 1, flexWrap: "wrap", gap: 1 }}
+              >
+                {sortedOptions.map((opt) => (
+                  <ToggleButton key={`${attr}-${opt}`} value={opt}>
+                    {attr === "watts"
+                      ? `${opt}W`
+                      : attr === "ampere"
+                      ? `${opt}A`
+                      : attr === "voltage"
+                      ? `${opt}V`
+                      : opt}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            </Box>
+          );
+        })}
+
         <Typography
           component="p"
           sx={{ fontSize: "1rem", fontWeight: "bold", mt: "1rem" }}
@@ -215,14 +180,7 @@ export default function ProductDetailMenu({
           <Button
             variant="contained"
             fullWidth
-            disabled={
-              !selectedVariant ||
-              Number(quantity) < 1 ||
-              Number(quantity) > maxAvailable ||
-              maxAvailable < 1 ||
-              (hasColor && !color) ||
-              (hasWatts && !watts)
-            }
+            disabled={isDisabled}
             onClick={handleAddToCart}
           >
             Añadir al carrito
@@ -230,14 +188,7 @@ export default function ProductDetailMenu({
           <Button
             variant="outlined"
             fullWidth
-            disabled={
-              !selectedVariant ||
-              Number(quantity) < 1 ||
-              Number(quantity) > maxAvailable ||
-              maxAvailable < 1 ||
-              (hasColor && !color) ||
-              (hasWatts && !watts)
-            }
+            disabled={isDisabled}
             onClick={handleBuyNow}
           >
             Comprar ahora

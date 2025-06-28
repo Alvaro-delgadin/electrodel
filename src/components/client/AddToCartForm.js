@@ -11,120 +11,114 @@ export default function AddToCartForm({
   handleClose,
   variants,
 }) {
-  const [color, setColor] = useState("");
-  const [watts, setWatts] = useState(0);
-  const [ampere, setAmpere] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [loading, setLoading] = useState(true);
   const addToCart = useCartStore((state) => state.addToCart);
   const cart = useCartStore((state) => state.cart);
+  const [selected, setSelected] = useState({
+    color: "",
+    watts: "",
+    ampere: "",
+    voltage: "",
+  });
+  const attributes = ["color", "watts", "ampere", "voltage"];
+  const labelMap = {
+    color: "Color",
+    watts: "Potencia (W)",
+    ampere: "Corriente (A)",
+    voltage: "Tensión (V)",
+  };
+  const getSelectedValue = (attr) => selected[attr];
+  const setSelectedValue = (attr, value) =>
+    setSelected((prev) => ({ ...prev, [attr]: value }));
+  const attributesToShow = attributes.filter((attr) =>
+    variants.some((v) => v[attr] !== undefined && v[attr] !== null)
+  );
 
-  const hasColor = variants.some((v) => !!v.color);
-  const hasWatts = variants.some((v) => !!v.watts);
-  const hasAmpere = variants.some((v) => !!v.ampere);
+  const getFilteredOptions = (attribute) => {
+    return [
+      ...new Set(
+        variants
+          .filter((v) =>
+            attributes.every(
+              (attr) =>
+                attr === attribute || // ignoramos el que estamos calculando
+                !getSelectedValue(attr) || // si no está seteado, lo ignoramos
+                (attr === "watts"
+                  ? v[attr] === Number(getSelectedValue(attr))
+                  : v[attr] === getSelectedValue(attr))
+            )
+          )
+          .map((v) => v[attribute])
+          .filter(Boolean)
+      ),
+    ];
+  };
 
-  const filteredColors = [
-    ...new Set(
-      variants
-        .filter(
-          (v) =>
-            (!watts || v.watts === Number(watts)) &&
-            (!ampere || v.ampere === ampere)
-        )
-        .map((v) => v.color)
-    ),
-  ];
-
-  const filteredWatts = [
-    ...new Set(
-      variants
-        .filter(
-          (v) =>
-            (!color || v.color === color) && (!ampere || v.ampere === ampere)
-        )
-        .map((v) => v.watts)
-    ),
-  ];
-
-  const filteredAmperes = [
-    ...new Set(
-      variants
-        .filter(
-          (v) =>
-            (!color || v.color === color) &&
-            (!watts || v.watts === Number(watts))
-        )
-        .map((v) => v.ampere)
-    ),
-  ];
   useEffect(() => {
-    if (!color && !watts && !ampere && variants.length > 0) {
+    if (
+      variants.length > 0 &&
+      attributes.every((attr) => !getSelectedValue(attr))
+    ) {
       const first = variants[0];
-      if (first.color) setColor(first.color);
-      if (first.watts) setWatts(first.watts.toString());
-      if (first.ampere) setAmpere(first.ampere);
+      const initial = {};
+      attributes.forEach((attr) => {
+        if (first[attr] !== undefined && first[attr] !== null) {
+          initial[attr] = first[attr].toString();
+        }
+      });
+      setSelected((prev) => ({ ...prev, ...initial }));
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   // Seleccionar variante según atributos seleccionados
   useEffect(() => {
-    if (!hasColor && !hasWatts && !hasAmpere && variants.length === 1) {
-      setSelectedVariant(variants[0]);
-      return;
-    }
-
-    const variant = variants.find(
-      (v) =>
-        (!hasColor || v.color === color) &&
-        (!hasWatts || v.watts === Number(watts)) &&
-        (!hasAmpere || v.ampere === ampere)
+    const match = variants.find((v) =>
+      attributes.every((attr) =>
+        !getSelectedValue(attr)
+          ? true
+          : attr === "watts"
+          ? v[attr] === Number(getSelectedValue(attr))
+          : v[attr] === getSelectedValue(attr)
+      )
     );
-    setSelectedVariant(variant || null);
-  }, [color, watts, ampere, variants, hasColor, hasWatts, hasAmpere]);
+    setSelectedVariant(match || null);
+  }, [selected, variants]);
 
   // Autoseleccionar si hay un solo color/potencia/corriente
   useEffect(() => {
-    if (
-      hasColor &&
-      filteredColors.length === 1 &&
-      !color // solo auto-setea si color NO está seleccionado
-    ) {
-      setColor(filteredColors[0]);
-    }
-    if (
-      hasWatts &&
-      filteredWatts.length === 1 &&
-      !watts // igual para watts
-    ) {
-      setWatts(filteredWatts[0].toString());
-    }
-    if (hasAmpere && filteredAmperes.length === 1 && !ampere) {
-      setAmpere(filteredAmperes[0]);
-    }
-  }, [
-    filteredColors,
-    filteredWatts,
-    filteredAmperes,
-    hasColor,
-    hasWatts,
-    hasAmpere,
-  ]);
+    attributes.forEach((attr) => {
+      const filtered = getFilteredOptions(attr);
+      const current = getSelectedValue(attr);
+      if (filtered.length === 1 && !current) {
+        setSelectedValue(attr, filtered[0].toString());
+      }
+    });
+  }, [variants, selected]);
 
   // Limpiar la selección si ya no es válida
   useEffect(() => {
-    if (watts && !filteredWatts.includes(Number(watts))) {
-      setWatts("");
-    }
-    if (ampere && !filteredAmperes.includes(ampere)) {
-      setAmpere("");
-    }
-    if (color && !filteredColors.includes(color)) {
-      setColor("");
-    }
-  }, [filteredWatts, filteredAmperes, filteredColors]);
+    attributes.forEach((attr) => {
+      const filtered = getFilteredOptions(attr);
+      const current = getSelectedValue(attr);
+      if (
+        current &&
+        !filtered.includes(attr === "watts" ? Number(current) : current)
+      ) {
+        setSelectedValue(attr, "");
+      }
+    });
+  }, [variants, selected]);
 
+  const handleReset = () => {
+    const reset = {};
+    attributes.forEach((attr) => (reset[attr] = ""));
+    setSelected(reset);
+    setQuantity("1");
+    setSelectedVariant(null);
+  };
   const quantityInCart = cart
     .filter((item) => item.id === selectedVariant?.id)
     .reduce((sum, item) => sum + item.quantity, 0);
@@ -154,31 +148,31 @@ export default function AddToCartForm({
       if (mode === "card") handleClose();
     }
   };
-  const handleReset = () => {
-    setColor("");
-    setWatts("");
-    setAmpere("");
-    setQuantity("1");
-    setSelectedVariant(null);
-  };
+  const isDisabled =
+    !selectedVariant ||
+    Number(quantity) < 1 ||
+    Number(quantity) > maxAvailable ||
+    maxAvailable < 1 ||
+    attributes.some(
+      (attr) =>
+        variants.some((v) => v[attr] !== undefined && v[attr] !== null) &&
+        !getSelectedValue(attr)
+    );
+
   const props = {
     anchorEl,
     open,
     handleClose,
     handleReset,
     handleAddToCart,
-    hasColor,
-    hasWatts,
-    hasAmpere,
-    filteredColors,
-    filteredWatts,
-    filteredAmperes,
-    color,
-    setColor,
-    watts,
-    setWatts,
-    ampere,
-    setAmpere,
+    attributes,
+    labelMap,
+    isDisabled,
+    attributesToShow,
+    getFilteredOptions,
+    getSelectedValue,
+    setSelectedValue,
+    variants,
     quantity,
     setQuantity,
     maxAvailable,

@@ -202,6 +202,13 @@ export default function ProductsTable() {
       editable: true,
     },
     {
+      field: "voltage",
+      headerName: "Tensión (V)",
+      type: "text",
+      nullable: true,
+      editable: true,
+    },
+    {
       field: "color",
       headerName: "Color",
       type: "text",
