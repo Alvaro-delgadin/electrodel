@@ -37,6 +37,9 @@ export function createActions(
           subcategory: row.subcategory || "",
           stock: row.stock || "",
           images: row.images || "",
+          description: row.description || "",
+          brand: row.brand || "",
+          color: row.color || "",
         };
       }
       columns.forEach((col) => {
