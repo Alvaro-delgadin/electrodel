@@ -27,10 +27,10 @@ export default function ProductDetailMenu({
   setQuantity,
   maxAvailable,
   selectedVariant,
-  selected,
   finalPrice,
   discount,
   priceWithDiscount,
+  loading,
 }) {
   const router = useRouter();
   const handleBuyNow = () => {
@@ -48,10 +48,10 @@ export default function ProductDetailMenu({
       }}
     >
       <Typography variant="h5" gutterBottom>
-        {selected.product}
+        {selectedVariant?.product}
       </Typography>
 
-      {selectedVariant ? (
+      {selectedVariant && !loading ? (
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
           <Typography component="h1" variant="h4">
             ${formatPrice(priceWithDiscount)}
@@ -83,15 +83,27 @@ export default function ProductDetailMenu({
           )}
         </Box>
       ) : (
+        ""
+      )}
+      {!selectedVariant && !loading ? (
         <Typography variant="h6" color="error">
           No hay stock para esta combinación.
         </Typography>
+      ) : (
+        ""
       )}
 
       <Typography sx={{ mt: 1 }} color="text.secondary">
-        {selected.category} — {selected.subcategory}
+        {selectedVariant?.category} — {selectedVariant?.subcategory}
       </Typography>
 
+      {selectedVariant?.brand ? (
+        <Typography color="text.secondary">
+          Marca: {selectedVariant.brand}
+        </Typography>
+      ) : (
+        ""
+      )}
       {selectedVariant?.description ? (
         <>
           <Typography component="p" variant="body" sx={{ mt: 1 }}>

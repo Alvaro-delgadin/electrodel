@@ -10,16 +10,13 @@ export default function AddToCartForm({
   anchorEl,
   handleClose,
   variants,
-  selected,
 }) {
-  const [color, setColor] = useState(selected?.color || "");
-  const [watts, setWatts] = useState(selected?.watts || "");
+  const [color, setColor] = useState("");
+  const [watts, setWatts] = useState(0);
   const [ampere, setAmpere] = useState("");
   const [quantity, setQuantity] = useState("1");
-  const [selectedImage, setSelectedImage] = useState(
-    selected?.images?.[0] || []
-  );
   const [selectedVariant, setSelectedVariant] = useState(null);
+  const [loading, setLoading] = useState(true);
   const addToCart = useCartStore((state) => state.addToCart);
   const cart = useCartStore((state) => state.cart);
 
@@ -61,6 +58,15 @@ export default function AddToCartForm({
         .map((v) => v.ampere)
     ),
   ];
+  useEffect(() => {
+    if (!color && !watts && !ampere && variants.length > 0) {
+      const first = variants[0];
+      if (first.color) setColor(first.color);
+      if (first.watts) setWatts(first.watts.toString());
+      if (first.ampere) setAmpere(first.ampere);
+    }
+    setLoading(false);
+  }, []);
 
   // Seleccionar variante según atributos seleccionados
   useEffect(() => {
@@ -128,15 +134,15 @@ export default function AddToCartForm({
     : 0;
 
   const price = selectedVariant?.price || 0;
-  const finalPrice =
-    quantity && !isNaN(quantity) && !isNaN(selectedVariant?.discount)
-      ? price * (1 - selectedVariant?.discount / 100) * Number(quantity)
-      : 0;
 
   const discount = !isNaN(selectedVariant?.discount)
     ? selectedVariant?.discount
     : 0;
-  const priceWithDiscount = discount ? price * (1 - discount / 100) : 0;
+
+  const priceWithDiscount = price * (1 - discount / 100);
+
+  const finalPrice =
+    quantity && !isNaN(quantity) ? priceWithDiscount * Number(quantity) : 0;
   const handleAddToCart = () => {
     if (selectedVariant && Number(quantity) > 0) {
       const item = {
@@ -173,16 +179,14 @@ export default function AddToCartForm({
     setWatts,
     ampere,
     setAmpere,
-    selectedImage,
-    setSelectedImage,
     quantity,
     setQuantity,
     maxAvailable,
     selectedVariant,
-    selected,
     finalPrice,
     discount,
     priceWithDiscount,
+    loading,
   };
   return (
     <>
