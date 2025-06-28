@@ -21,11 +21,32 @@ export default function CuentaLayout({ children }) {
           return;
         }
 
-        const { data: profile, error } = await supabase
+        let { data: profile, error } = await supabase
           .from("profiles")
           .select("role")
           .eq("id", user.id)
           .single();
+
+        if (error && error.code === "PGRST116") {
+          // No existe perfil, creamos uno nuevo
+          const { error: insertError } = await supabase
+            .from("profiles")
+            .insert({
+              id: user.id,
+              email: user.email,
+              role: "client",
+            });
+          if (insertError) {
+            router.replace("/ingresar");
+            return;
+          }
+          // Después de insertar, volvemos a consultar el perfil
+          ({ data: profile, error } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single());
+        }
 
         if (error || !profile || profile.role !== "client") {
           router.replace("/ingresar");
