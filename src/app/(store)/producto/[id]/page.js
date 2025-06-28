@@ -1,16 +1,36 @@
 import { createClient } from "@/lib/supabaseServer"; // adaptalo a tu config
 import ProductDetail from "@/components/client/ProductDetail";
-
-export default async function ProductPage({ params }) {
-  const { id } = await params;
-
+import { cache } from "react";
+export const fetchProduct = cache(async (id) => {
   const supabase = await createClient();
-  const { data: selected, error } = await supabase
+  const { data, error } = await supabase
     .from("products")
     .select("*")
     .eq("id", id)
     .single();
 
+  if (error) throw new Error(error.message);
+  return { data, error };
+});
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const { data } = await fetchProduct(id);
+
+  return {
+    title: data?.product,
+    description: data?.description,
+    openGraph: {
+      title: data?.product,
+      description: data?.description,
+      images: data?.images,
+    },
+  };
+}
+export default async function ProductPage({ params }) {
+  const supabase = await createClient();
+  const { id } = await params;
+
+  const { data: selected, error } = await fetchProduct(id);
   if (error || !selected)
     return (
       <main>

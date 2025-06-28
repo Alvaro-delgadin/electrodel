@@ -1,5 +1,5 @@
 "use client";
-import { Close, ArrowRight, QuestionAnswer } from "@mui/icons-material";
+import { Close, ArrowRight, QuestionAnswer, Person } from "@mui/icons-material";
 import { useState, useRef, useEffect } from "react";
 import {
   Box,
@@ -46,14 +46,21 @@ export default function MainMenu({ setOpen, products }) {
         padding: 0,
       }}
     >
-      <ListItem
-        sx={{ paddingLeft: 0, cursor: "pointer" }}
-        onClick={() => setOpen(false)}
-      >
-        <IconButton>
+      <ListItem sx={{ paddingLeft: 0, cursor: "pointer" }}>
+        <IconButton onClick={() => setOpen(false)}>
           <Close />
         </IconButton>
         <ListItemText primary="Cerrar" sx={{ color: "#666666" }} />
+        <Box
+          sx={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+          onClick={() => {
+            setOpen(false);
+            router.push("/cuenta");
+          }}
+        >
+          <ListItemText primary="Mi cuenta" sx={{ color: "#666666" }} />
+          <Person />
+        </Box>
       </ListItem>
       <ListItem>
         <TextField

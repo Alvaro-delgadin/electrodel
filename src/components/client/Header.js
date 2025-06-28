@@ -3,7 +3,6 @@ import Image from "next/image";
 import NavBar from "@/components/client/NavBar";
 import HeaderActions from "./HeaderActions";
 import Link from "next/link";
-
 export default function Header({ logo, products }) {
   return (
     <AppBar

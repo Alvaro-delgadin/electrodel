@@ -1,6 +1,8 @@
 import styles from "./page.module.css";
 import ProductsTable from "@/components/admin/productsTable";
-
+export const metadata = {
+  title: "Todos los productos",
+};
 export default function Products() {
   return (
     <main className={styles.main}>

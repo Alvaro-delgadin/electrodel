@@ -5,11 +5,11 @@ import { IconButton, Drawer, Badge, Toolbar } from "@mui/material";
 import CartMenu from "./menus/CartMenu";
 import MainMenu from "./menus/MainMenu";
 import { useCartStore } from "@/app/stores/cartStore";
-
+import { useRouter } from "next/navigation";
 export default function HeaderActions({ products }) {
   const [open, setOpen] = useState(false);
   const { cart } = useCartStore();
-
+  const router = useRouter();
   return (
     <Toolbar sx={{ gap: "1rem", paddingInline: "0 !important" }}>
       <IconButton
@@ -41,6 +41,10 @@ export default function HeaderActions({ products }) {
       <IconButton
         aria-label="user"
         sx={{ display: { xs: "none", sm: "flex" } }}
+        onClick={() => {
+          setOpen(false);
+          router.push("/cuenta");
+        }}
       >
         <Person sx={{ fontSize: "2rem", color: "white" }} />
       </IconButton>

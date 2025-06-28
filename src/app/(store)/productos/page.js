@@ -3,6 +3,17 @@ import { Typography, Breadcrumbs } from "@mui/material";
 import ProductList from "@/components/client/ProductList";
 import Link from "next/link";
 
+export async function generateMetadata(props) {
+  const params = await props.searchParams;
+
+  const category = params?.categoria || null;
+  const subcategory = params?.subcategoria || null;
+  return {
+    title: `${category ? category : "Todos los productos"} ${
+      subcategory ? `| ${subcategory}` : ""
+    }`,
+  };
+}
 export default async function Products(props) {
   const params = await props.searchParams;
 
