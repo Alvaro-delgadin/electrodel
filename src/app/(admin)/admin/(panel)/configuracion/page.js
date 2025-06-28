@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import Status from "@/components/admin/Status";
 import Image from "next/image";
-import { Skeleton, Box, Button } from "@mui/material";
+import { Skeleton, Box, Button, Switch } from "@mui/material";
 
 export default function Settings() {
   const [sync, setSync] = useState(false);
@@ -16,6 +16,8 @@ export default function Settings() {
   const [location, setLocation] = useState("");
   const [schedule, setSchedule] = useState("");
   const [faqs, setFaqs] = useState([]);
+  const [banner, setBanner] = useState({ active: false, message: "" });
+
   const [data, setData] = useState(undefined);
   const rowId = "45645c26-d123-42a1-aa25-9d5a0bf52f33";
   const dataUpdatingRef = useRef(false);
@@ -34,6 +36,8 @@ export default function Settings() {
         setLocation(data.location);
         setSchedule(data.schedule);
         setFaqs(data.faqs || []);
+        setBanner(data.banner || { active: false, message: "" });
+
         setLoading(false);
       } else {
         setError(error.code);
@@ -158,6 +162,22 @@ export default function Settings() {
 
       setData((prev) => ({ ...prev, faqs }));
     }
+    if (JSON.stringify(data.banner || {}) !== JSON.stringify(banner)) {
+      setSync("Actualizando banner promocional");
+      const { error: updateError } = await supabase
+        .from("settings")
+        .update({ banner })
+        .eq("id", rowId);
+
+      if (updateError) {
+        setSync(false);
+        setError("Error al actualizar el banner: " + updateError.code);
+        dataUpdatingRef.current = false;
+        return;
+      }
+
+      setData((prev) => ({ ...prev, banner }));
+    }
 
     setSync(false);
     dataUpdatingRef.current = false;
@@ -224,12 +244,12 @@ export default function Settings() {
             pl: "1rem",
             gap: "0.5rem",
             fontSize: "1.1rem",
+            maxWidth: "30rem",
           }}
         >
           +54
           <input
             id="whatsapp"
-            style={{ paddingLeft: "0.5rem" }}
             onChange={(e) => setWhatsapp(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
@@ -239,6 +259,7 @@ export default function Settings() {
             value={whatsapp}
             type="text"
             className={styles.inputText}
+            style={{ paddingLeft: "0.5rem" }}
             disabled={loading}
           />
         </Box>
@@ -285,6 +306,53 @@ export default function Settings() {
           disabled={loading}
         />
       )}
+      <h2 className={styles.inputTitle}>Banner promocional</h2>
+      {loading ? (
+        <Skeleton
+          variant="rounded"
+          sx={{ width: "20rem", height: "3rem", borderRadius: "0.5rem" }}
+        />
+      ) : (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "1rem",
+            bgcolor: "#303030",
+            borderRadius: "0.5rem",
+            p: "1rem",
+            maxWidth: "30rem",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            <span>Mostrar banner:</span>
+            <Switch
+              checked={banner.active}
+              value={banner.active}
+              onChange={(e) => {
+                setBanner((prev) => ({ ...prev, active: e.target.checked }));
+              }}
+              color="primary"
+            />
+          </Box>
+          <input
+            placeholder="Mensaje del banner"
+            type="text"
+            value={banner.message}
+            onChange={(e) =>
+              setBanner((prev) => ({ ...prev, message: e.target.value }))
+            }
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit(e.target.value);
+              }
+            }}
+            className={styles.inputText}
+            style={{ backgroundColor: "var(--background)" }}
+            disabled={loading}
+          />
+        </Box>
+      )}
       <h2 className={styles.inputTitle}>Preguntas Frecuentes</h2>
       {loading ? (
         <Skeleton
@@ -297,7 +365,14 @@ export default function Settings() {
           }}
         />
       ) : (
-        <Box sx={{ bgcolor: "#303030", borderRadius: "0.5rem", p: "1rem" }}>
+        <Box
+          sx={{
+            bgcolor: "#303030",
+            borderRadius: "0.5rem",
+            p: "1rem",
+            maxWidth: "30rem",
+          }}
+        >
           {faqs.map((faq, index) => (
             <Box
               key={index}
