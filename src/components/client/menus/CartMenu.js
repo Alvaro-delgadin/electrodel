@@ -13,8 +13,9 @@ import {
 import formatPrice from "@/lib/client/formatters/formatPrice";
 import { useCartStore } from "@/app/stores/cartStore";
 import Image from "next/image";
-
+import { useRouter } from "next/navigation";
 export default function CartMenu({ setOpen }) {
+  const router = useRouter();
   const { cart, removeFromCart, clearCart } = useCartStore();
   const total = cart.reduce(
     (acc, item) => acc + item.price * (1 - item.discount / 100) * item.quantity,
