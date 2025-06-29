@@ -7,7 +7,7 @@ export default async function Home() {
     .from("products")
     .select("*")
     .eq("active", true)
-    .order("featured", { ascending: true });
+    .order("featured", { ascending: false });
 
   return (
     <main>
