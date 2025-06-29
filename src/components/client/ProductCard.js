@@ -19,6 +19,8 @@ export default function ProductCard({ productName, variants }) {
   const open = Boolean(anchorEl);
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(false);
+  const hasDiscount = variants.some((v) => v.discount > 0);
+
   return (
     <Card
       sx={{
@@ -76,6 +78,23 @@ export default function ProductCard({ productName, variants }) {
                   variants[0].price * (1 - variants[0].discount / 100)
                 )}`}
           </Typography>
+          {hasDiscount && (
+            <Box
+              sx={{
+                bgcolor: "#ec3237",
+                borderRadius: "2rem",
+                color: "white",
+                fontSize: "0.9rem",
+                fontWeight: "bold",
+                p: "0.5rem 0.8rem",
+                position: "absolute",
+                top: "0",
+                left: "0",
+              }}
+            >
+              Oferta
+            </Box>
+          )}
         </CardContent>
       </Link>
 
