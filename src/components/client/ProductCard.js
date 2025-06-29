@@ -38,6 +38,22 @@ export default function ProductCard({ productName, variants }) {
         href={`/producto/${variants[0].id}`}
         style={{ textDecoration: "none", color: "inherit" }}
       >
+        {hasDiscount && (
+          <Box
+            sx={{
+              bgcolor: "#ec3237",
+              borderRadius: "2rem",
+              color: "white",
+              fontSize: "0.9rem",
+              fontWeight: "bold",
+              p: "0.5rem 0.8rem",
+              width: "fit-content",
+              position: "absolute",
+            }}
+          >
+            Oferta
+          </Box>
+        )}
         <Box
           sx={{
             maxWidth: "16rem",
@@ -79,23 +95,6 @@ export default function ProductCard({ productName, variants }) {
                   variants[0].price * (1 - variants[0].discount / 100)
                 )}`}
           </Typography>
-          {hasDiscount && (
-            <Box
-              sx={{
-                bgcolor: "#ec3237",
-                borderRadius: "2rem",
-                color: "white",
-                fontSize: "0.9rem",
-                fontWeight: "bold",
-                p: "0.5rem 0.8rem",
-                position: "absolute",
-                top: "0",
-                left: "0",
-              }}
-            >
-              Oferta
-            </Box>
-          )}
         </CardContent>
       </Link>
 
