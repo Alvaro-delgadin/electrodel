@@ -141,14 +141,16 @@ export default function ProductsTable() {
       field: "active",
       headerName: "Activo",
       type: "boolean",
-      nullable: true,
+      nullable: false,
+      default: true,
       editable: true,
     },
     {
       field: "featured",
       headerName: "Destacado",
       type: "boolean",
-      nullable: true,
+      nullable: false,
+      default: false,
       editable: true,
     },
     {

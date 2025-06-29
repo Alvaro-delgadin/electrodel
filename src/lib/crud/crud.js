@@ -40,6 +40,7 @@ export function createActions(
           description: row.description || "",
           brand: row.brand || "",
           color: row.color || "",
+          featured: row.featured,
         };
       }
       columns.forEach((col) => {
@@ -47,13 +48,7 @@ export function createActions(
 
         if (newRow[col.field] === undefined) {
           newRow[col.field] =
-            "default" in col
-              ? col.default
-              : col.type === "number"
-              ? 0
-              : col.type === "boolean"
-              ? true
-              : "";
+            "default" in col ? col.default : col.type === "number" ? 0 : "";
         }
       });
 
