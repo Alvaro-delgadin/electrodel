@@ -40,8 +40,9 @@ export default function ProductCard({ productName, variants }) {
       >
         <Box
           sx={{
-            maxWidth: "15rem",
+            maxWidth: "16rem",
             width: "100%",
+            p: "0 0.5rem",
             aspectRatio: "1/1",
             borderRadius: 2,
             overflow: "hidden",
