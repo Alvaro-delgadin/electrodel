@@ -6,7 +6,8 @@ export default async function Home() {
   const { data: products } = await supabase
     .from("products")
     .select("*")
-    .eq("active", true);
+    .eq("active", true)
+    .eq("featured", true);
 
   return (
     <main>

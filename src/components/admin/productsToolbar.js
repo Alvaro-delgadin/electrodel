@@ -33,6 +33,8 @@ import {
   ViewColumn,
   FilterList,
   FileDownload,
+  Star,
+  StarBorderOutlined,
 } from "@mui/icons-material";
 import Status from "@/components/admin/Status";
 
@@ -108,6 +110,25 @@ export default function CustomToolbar({
         }}
       >
         {rowsSelected?.length ? (
+          <Tooltip title="Destacar productos">
+            <ToolbarButton onClick={() => setRowsValue("featured", true)}>
+              <Star fontSize="small" />
+            </ToolbarButton>
+          </Tooltip>
+        ) : (
+          ""
+        )}
+
+        {rowsSelected?.length ? (
+          <Tooltip title="No destacar productos">
+            <ToolbarButton onClick={() => setRowsValue("featured", false)}>
+              <StarBorderOutlined fontSize="small" />
+            </ToolbarButton>
+          </Tooltip>
+        ) : (
+          ""
+        )}
+        {rowsSelected?.length ? (
           <Tooltip title="Desactivar productos">
             <ToolbarButton onClick={() => setRowsValue("active", false)}>
               <Clear fontSize="small" />
@@ -125,7 +146,6 @@ export default function CustomToolbar({
         ) : (
           ""
         )}
-
         <Tooltip title="Añadir producto">
           <ToolbarButton onClick={addRow}>
             <Add fontSize="small" />

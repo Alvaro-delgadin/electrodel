@@ -128,9 +128,9 @@ export default function ProductDetailMenu({
                     {attr === "watts"
                       ? `${opt}W`
                       : attr === "ampere"
-                      ? `${opt}A`
+                      ? `${opt}`
                       : attr === "voltage"
-                      ? `${opt}V`
+                      ? `${opt}`
                       : opt}
                   </ToggleButton>
                 ))}

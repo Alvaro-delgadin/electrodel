@@ -145,6 +145,13 @@ export default function ProductsTable() {
       editable: true,
     },
     {
+      field: "featured",
+      headerName: "Destacado",
+      type: "boolean",
+      nullable: true,
+      editable: true,
+    },
+    {
       field: "category",
       headerName: "Categoría",
       type: "singleSelect",

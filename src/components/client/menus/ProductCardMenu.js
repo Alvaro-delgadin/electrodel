@@ -54,17 +54,13 @@ export default function ProductCardMenu({
           const options = getFilteredOptions(attr);
           if (options.length === 0) return null; // extra seguridad
 
-          const labelMap = {
-            color: "Color",
-            watts: "Potencia",
-            ampere: "Corriente (A)",
-            voltage: "Voltaje (V)",
-          };
-
           return (
             <FormControl key={attr} fullWidth>
               <InputLabel>{labelMap[attr] || attr}</InputLabel>
               <Select
+                sx={{
+                  height: "3.5rem",
+                }}
                 value={getSelectedValue(attr) || ""}
                 onChange={(e) => setSelectedValue(attr, e.target.value)}
                 label={labelMap[attr] || attr}
@@ -75,9 +71,9 @@ export default function ProductCardMenu({
                     {attr === "watts"
                       ? `${opt}W`
                       : attr === "ampere"
-                      ? `${opt}A`
+                      ? `${opt}`
                       : attr === "voltage"
-                      ? `${opt}V`
+                      ? `${opt}`
                       : opt}
                   </MenuItem>
                 ))}
