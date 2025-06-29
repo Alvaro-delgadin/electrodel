@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabaseServer";
 import { Typography, Breadcrumbs } from "@mui/material";
 import ProductList from "@/components/client/ProductList";
 import Link from "next/link";
-
+import groupProducts from "@/lib/client/utils/groupProducts";
 export async function generateMetadata(props) {
   const params = await props.searchParams;
 
@@ -32,8 +32,9 @@ export default async function Products(props) {
     query = query.eq("subcategory", subcategory);
   }
 
-  const { data: products } = await query;
+  const { data } = await query;
 
+  const products = groupProducts(data);
   return (
     <main>
       <Typography
