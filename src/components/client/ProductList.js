@@ -26,8 +26,8 @@ export default function ProductList({ products }) {
         sx={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-around",
           flexWrap: "wrap",
+          justifyContent: "center",
           gap: "2rem",
         }}
       >

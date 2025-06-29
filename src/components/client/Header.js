@@ -26,7 +26,7 @@ export default function Header({ logo, products }) {
           <Box
             sx={{
               height: "5rem",
-              p: "0.8rem 1rem",
+              p: "0.5rem 1rem",
               borderRadius: "0.5rem",
               bgcolor: "#f5f5f5",
             }}

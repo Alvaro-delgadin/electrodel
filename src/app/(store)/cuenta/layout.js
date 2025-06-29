@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabaseClient";
 export default function CuentaLayout({ children }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-
+  /*
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -65,6 +65,6 @@ export default function CuentaLayout({ children }) {
   }, [router]);
 
   if (loading) return <div>Cargando...</div>;
-
+*/
   return <>{children}</>;
 }
