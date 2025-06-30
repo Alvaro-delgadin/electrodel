@@ -9,18 +9,18 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    const paymentId = body?.data?.id;
+    const paymentId = body?.data?.id || body?.resource;
     console.log(body);
 
     if (body.topic !== "payment") {
       console.log("🔕 Topic no manejado:", body.topic);
       return new NextResponse("Ignored", { status: 200 });
     }
+
     if (!paymentId) {
-      return NextResponse.json(
-        { error: "Missing payment ID" },
-        { status: 400 }
-      );
+      console.error("❌ No se encontró payment ID en el body:", body);
+      return NextResponse.json({ error: "Missing payment ID" }, { status: 400 });
+    }
     }
 
     // Consulta a MP
