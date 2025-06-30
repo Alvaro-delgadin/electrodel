@@ -117,6 +117,7 @@ export async function POST(req) {
           ampere: item.ampere || null,
           watts: item.watts || null,
           voltage: item.voltage || null,
+          product_name: item.product,
         })
         .select()
         .single();

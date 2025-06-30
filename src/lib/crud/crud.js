@@ -117,8 +117,15 @@ export function createActions(
         if (requestLock.current) return;
         requestLock.current = true;
         setSync(`Subiendo nuevo ${item}`);
-        const { actions, id, isNew, created_at, showOrder, ...newProduct } =
-          row;
+        const {
+          actions,
+          id,
+          isNew,
+          created_at,
+          showOrder,
+          showSale,
+          ...newProduct
+        } = row;
 
         if (table === "products") {
           newProduct.images = !newProduct.images ? [] : newProduct.images;

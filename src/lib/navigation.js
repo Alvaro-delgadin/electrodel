@@ -10,6 +10,11 @@ export const NAV_ITEMS = [
     icon: "/icons/productos.svg",
   },
   {
+    label: "Ventas",
+    href: "/admin/ventas",
+    icon: "/icons/cart.svg",
+  },
+  {
     label: "Pedidos",
     href: "/admin/pedidos",
     icon: "/icons/pedidos.svg",

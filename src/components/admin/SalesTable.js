@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { DataGrid, GridActionsCellItem, useGridApiRef } from "@mui/x-data-grid";
+import { DataGrid } from "@mui/x-data-grid";
 import { esES } from "@mui/x-data-grid/locales";
 import {
   Tooltip,
@@ -14,79 +14,46 @@ import {
   Box,
   CircularProgress,
 } from "@mui/material";
-import CustomToolbar from "@/components/admin/ordersToolbar.js";
-import { Save, Cancel, Delete, MenuOpen } from "@mui/icons-material";
-import { createActions } from "@/lib/crud/crud";
+import CustomToolbar from "@/components/admin/SalesToolbar.js";
+import { MenuOpen } from "@mui/icons-material";
 
-export default function OrdersTable() {
+export default function SalesTable() {
   const [rows, setRows] = useState([]);
   const [sync, setSync] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const requestLock = useRef(false);
-  const apiRef = useGridApiRef();
-  const channelRef = useRef(null);
-  const isSubscribed = useRef(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [selectedOrderId, setSelectedOrderId] = useState(null);
-  const [orderItems, setOrderItems] = useState([]);
+  const [selectedSaleId, setSelectedSaleId] = useState(null);
+  const [saleItems, setSaleItems] = useState([]);
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("*")
-        .eq("active", true)
-        .order("created_at", { ascending: false });
-      if (data) {
-        setRows(data);
-        setLoading(false);
-      } else {
-        setError(error.code);
-      }
-    };
-
-    fetchOrders();
-
-    if (isSubscribed.current) return;
-
-    const channel = supabase
-      .channel("orders-inserts")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "orders",
-        },
-        (payload) => {
-          apiRef.current.updateRows([payload.new]);
-        }
-      )
-      .subscribe();
-
-    channelRef.current = channel;
-    isSubscribed.current = true;
-
-    return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-        isSubscribed.current = false;
-      }
-    };
+    fetchSales();
   }, []);
 
+  const fetchSales = async () => {
+    const { data, error } = await supabase
+      .from("sales")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (data) {
+      setRows(data);
+      setLoading(false);
+    } else {
+      setError(error.code);
+    }
+  };
   async function handleOpenDrawer(row) {
     setSync(true);
     setDrawerOpen(true);
-    setSelectedOrderId(row.id);
+    setSelectedSaleId(row.id);
 
     const { data, error } = await supabase
-      .from("order_items")
+      .from("sale_items")
       .select(
         `
     quantity,
+    unit_price,
+    discount,
       color,
       watts,
       ampere,
@@ -94,31 +61,30 @@ export default function OrdersTable() {
       product_name
   `
       )
-      .eq("order_id", row.id);
+      .eq("sale_id", row.id);
 
     if (error) {
-      console.error("Error al obtener productos del pedido:", error);
+      console.error("Error al obtener productos de la venta:", error);
       setSync(false);
       return;
     }
     setSync(false);
-    setOrderItems(data);
+    setSaleItems(data);
   }
 
   function handleCloseDrawer() {
     setDrawerOpen(false);
-    setSelectedOrderId(null);
-    setOrderItems([]);
+    setSelectedSaleId(null);
+    setSaleItems([]);
   }
   const columns = [
     {
-      field: "showOrder",
-      headerName: "Ver pedido",
+      field: "showSale",
+      headerName: "Ver venta",
       type: "text",
       nullable: true,
       width: 100,
       editable: false,
-
       headerAlign: "center",
       renderCell: (params) => {
         return (
@@ -132,7 +98,7 @@ export default function OrdersTable() {
       },
     },
     {
-      field: "client",
+      field: "customer_name",
       headerName: "Cliente",
       type: "text",
       nullable: false,
@@ -144,10 +110,10 @@ export default function OrdersTable() {
       headerName: "Fecha",
       type: "text",
       nullable: true,
-      width: 150,
       default: new Date().toISOString(),
       sortable: true,
       editable: false,
+      width: 150,
       renderCell: (params) => {
         const date = new Date(params.value);
         return date.toLocaleDateString("es-AR", {
@@ -158,25 +124,11 @@ export default function OrdersTable() {
       },
     },
     {
-      field: "status",
-      headerName: "Estado",
-      type: "singleSelect",
-      nullable: false,
-      width: 120,
-      editable: true,
-      default: "pending",
-      valueOptions: [
-        { value: "pending", label: "🟡  Pendiente" },
-        { value: "send", label: "🔵 Enviado" },
-        { value: "finished", label: "🟢 Finalizado" },
-      ],
-    },
-    {
       field: "total",
-      headerName: "Envío",
+      headerName: "Total",
       type: "number",
       nullable: false,
-      editable: true,
+      editable: false,
       headerAlign: "left",
       align: "left",
       renderCell: (params) => {
@@ -191,92 +143,36 @@ export default function OrdersTable() {
       },
     },
     {
+      field: "payment_method",
+      headerName: "Método de pago",
+      type: "text",
+      nullable: true,
+      editable: false,
+      width: 150,
+    },
+    {
       field: "whatsapp",
       headerName: "WhatsApp",
       type: "text",
       nullable: true,
-      width: 150,
-    },
-    {
-      field: "address",
-      headerName: "Dirección",
-      type: "text",
-      nullable: true,
+      editable: true,
       width: 150,
     },
     { field: "id", headerName: "id", type: "text", nullable: true },
-    {
-      field: "actions",
-      headerName: "Acciones",
-      width: 100,
-      type: "actions",
-      getActions: ({ id, row }) => {
-        if (row.isNew) {
-          return [
-            <Tooltip title="Guardar" key={1}>
-              <GridActionsCellItem
-                icon={<Save />}
-                label="Guardar"
-                onClick={() => {
-                  action.saveNewRow(row);
-                }}
-              />
-            </Tooltip>,
-            <Tooltip title="Cancelar" key={2}>
-              <GridActionsCellItem
-                icon={<Cancel />}
-                label="Cancelar"
-                onClick={() => action.cancelNewRow(id)}
-              />
-            </Tooltip>,
-          ];
-        }
-        return [
-          <Tooltip title="Eliminar" key={3}>
-            <GridActionsCellItem
-              icon={<Delete />}
-              label="Eliminar"
-              onClick={() => action.deleteRow(id)}
-            />
-          </Tooltip>,
-        ];
-      },
-      sortable: false,
-      filterable: false,
-    },
   ];
-
-  const action = createActions(
-    "orders",
-    "pedido",
-    supabase,
-    apiRef,
-    setSync,
-    setError,
-    requestLock,
-    columns
-  );
 
   return (
     <div className="tableContainer">
       <DataGrid
         rows={rows}
-        apiRef={apiRef}
         columns={columns}
         loading={loading}
         sortModel={[{ field: "created_at", sort: "desc" }]}
-        getRowClassName={(params) => {
-          const classes = [];
-          if (params.row.isNew) classes.push("noHover");
-          return classes.join(" ");
-        }}
-        processRowUpdate={action.rowUpdate}
-        onProcessRowUpdateError={(error) => setError(error.message)}
         disableRowSelectionOnClick
         disableVirtualization
         localeText={{
           ...esES.components.MuiDataGrid.defaultProps.localeText,
-          noRowsLabel: "Sin pedidos",
+          noRowsLabel: "Sin ventas",
         }}
         showToolbar
         slots={{
@@ -287,21 +183,20 @@ export default function OrdersTable() {
             loading,
             sync,
             error,
-            addRow: action.addRow,
           },
         }}
       />
       <Drawer anchor="right" open={drawerOpen} onClose={handleCloseDrawer}>
         <div style={{ width: 400, padding: 24 }}>
           <Typography variant="h6" gutterBottom>
-            Productos del pedido
+            Productos de la venta
           </Typography>
 
           <Divider style={{ marginBottom: 16 }} />
 
-          {!sync && orderItems.length ? (
+          {!sync && saleItems.length ? (
             <List>
-              {orderItems.map((item, index) => (
+              {saleItems.map((item, index) => (
                 <ListItem key={index} divider alignItems="flex-start">
                   <Box>
                     <Typography variant="subtitle1" fontWeight="bold">
@@ -337,9 +232,9 @@ export default function OrdersTable() {
           ) : (
             ""
           )}
-          {!sync && !orderItems.length ? (
+          {!sync && !saleItems.length ? (
             <Typography color="text.secondary">
-              No se encontraron productos para este pedido.
+              No se encontraron productos para esta venta.
             </Typography>
           ) : (
             ""

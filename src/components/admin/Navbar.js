@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient.js";
 import { useEffect, useState } from "react";
 import { useLogout } from "@/lib/logout";
+import Image from "next/image";
 export default function Navbar() {
   const pathname = usePathname();
   const logout = useLogout();
@@ -52,12 +53,24 @@ export default function Navbar() {
             }`}
             key={index}
           >
-            <img src={item.icon} className={styles.icon} />
+            <Image
+              width={40}
+              height={40}
+              alt={item.label}
+              src={item.icon}
+              className={styles.icon}
+            />
             <p className={styles.label}>{item.label}</p>
           </Link>
         ))}
         <button className={styles.logout} onClick={logout}>
-          <img className={styles.icon} src="/icons/logout.svg" />
+          <Image
+            width={40}
+            height={40}
+            alt="icon"
+            className={styles.icon}
+            src="/icons/logout.svg"
+          />
           <p className={styles.label}>Cerrar sesión</p>
         </button>
       </nav>
