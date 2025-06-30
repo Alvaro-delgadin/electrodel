@@ -1,30 +1,22 @@
 "use client";
+import "@/styles/admin/globals.css";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-
-import CircularProgress from "@mui/material/CircularProgress";
+import { supabase } from "@/lib/supabaseClient";
+import { ThemeProvider, CircularProgress } from "@mui/material";
 import Box from "@mui/material/Box";
-
-import "@/styles/admin/globals.css";
-import Sidebar from "@/components/admin/sidebar.js";
-import { ThemeProvider } from "@mui/material";
+import Navbar from "@/components/admin/Navbar.js";
 import { theme } from "@/components/admin/theme";
+
 export default function AdminLayout({ children }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [hasMounted, setHasMounted] = useState(false);
-  const supabase = createClientComponentClient();
 
   useEffect(() => {
-    setHasMounted(true); // Esto asegura que ya estamos en cliente
-  }, []);
-
-  useEffect(() => {
-    if (!hasMounted) return;
-
     checkSession();
-  }, [hasMounted]);
+    setHasMounted(true);
+  }, []);
 
   const checkSession = async () => {
     const {
@@ -62,9 +54,9 @@ export default function AdminLayout({ children }) {
   }
 
   return (
-    <>
-      <Sidebar />
-      <ThemeProvider theme={theme}>{children}</ThemeProvider>
-    </>
+    <ThemeProvider theme={theme}>
+      <Navbar />
+      {children}
+    </ThemeProvider>
   );
 }

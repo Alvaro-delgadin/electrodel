@@ -12,11 +12,14 @@ import {
   Alert,
   InputAdornment,
 } from "@mui/material";
+import { Logout } from "@mui/icons-material";
+import { useRouter } from "next/navigation";
 export default function Account() {
   const [form, setForm] = useState({ name: "", whatsapp: "", address: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchPerfil = async () => {
@@ -81,6 +84,10 @@ export default function Account() {
     setSaving(false);
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/ingresar");
+  };
   return (
     <main>
       {loading ? (
@@ -156,6 +163,16 @@ export default function Account() {
               disabled={saving}
             >
               {saving ? <CircularProgress size={24} /> : "Guardar"}
+            </Button>
+          </Box>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleLogout}
+              startIcon={<Logout />}
+            >
+              Cerrar sesión
             </Button>
           </Box>
         </Container>

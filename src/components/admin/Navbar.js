@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient.js";
 import { useEffect, useState } from "react";
 import { useLogout } from "@/lib/logout";
-export default function Sidebar() {
+export default function Navbar() {
   const pathname = usePathname();
   const logout = useLogout();
   const [logo, setLogo] = useState(undefined);

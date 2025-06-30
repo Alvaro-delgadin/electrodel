@@ -1,13 +1,11 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-
-export default function CuentaLayout({ children }) {
+import { CircularProgress } from "@mui/material";
+export default function AccountLayout({ children }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  /*
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -64,7 +62,12 @@ export default function CuentaLayout({ children }) {
     checkAuth();
   }, [router]);
 
-  if (loading) return <div>Cargando...</div>;
-*/
+  if (loading)
+    return (
+      <main>
+        <CircularProgress size={40} sx={{ m: "auto" }} />
+      </main>
+    );
+
   return <>{children}</>;
 }

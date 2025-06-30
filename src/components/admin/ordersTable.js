@@ -288,16 +288,28 @@ export default function OrdersTable() {
               {orderItems.map((item, index) => (
                 <ListItem key={index} divider>
                   <ListItemText
-                    primary={`${item.product_name} (${
-                      item.color || "Sin color"
-                    })`}
+                    primary={item.product_name}
                     secondary={
-                      <>
-                        <Box>Cantidad: {item.quantity}</Box>
-                        {item.watts && <Box>Watts: {item.watts}</Box>}
-                        {item.ampere && <Box>Ampere: {item.ampere}</Box>}
-                        {item.voltage && <Box>Voltage: {item.voltage}</Box>}
-                      </>
+                      <Box sx={{ display: "flex", flexDirection: "column" }}>
+                        <Typography variant="span" color="text.secondary">
+                          Cantidad: {item.quantity}
+                        </Typography>
+                        {item.color && (
+                          <Typography variant="span" color="text.secondary">
+                            Color: {item.color}
+                          </Typography>
+                        )}
+                        {item.ampere && (
+                          <Typography variant="span" color="text.secondary">
+                            Ampere: {item.ampere}
+                          </Typography>
+                        )}
+                        {item.voltage && (
+                          <Typography variant="span" color="text.secondary">
+                            Voltage: {item.voltage}
+                          </Typography>
+                        )}
+                      </Box>
                     }
                   />
                 </ListItem>
