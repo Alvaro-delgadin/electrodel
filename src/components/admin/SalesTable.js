@@ -209,7 +209,7 @@ export default function SalesTable() {
                       Descuento: {item.discount}%
                     </Typography>
                     <Typography color="text.secondary">
-                      Precio unitario con Descuento:{" "}
+                      Precio unitario con Descuento: ${" "}
                       {formatPrice(item.unit_price * (1 - item.discount / 100))}
                     </Typography>
                     <Typography color="text.secondary">
