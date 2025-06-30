@@ -6,10 +6,10 @@ export async function POST(req) {
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
+
   try {
     const body = await req.json();
     const paymentId = body?.data?.id;
-    console.log(body);
 
     if (!paymentId) {
       return NextResponse.json(
@@ -18,7 +18,7 @@ export async function POST(req) {
       );
     }
 
-    // Consultamos el estado del pago a Mercado Pago
+    // Consulta a MP
     const paymentRes = await fetch(
       `https://api.mercadopago.com/v1/payments/${paymentId}`,
       {
@@ -37,57 +37,55 @@ export async function POST(req) {
       });
     }
 
-    const items = payment.additional_info?.items || [];
+    const items = payment.metadata?.items || [];
+    const clientInfo = payment.metadata?.client || {
+      name: "Sin nombre",
+      whatsapp: "",
+      address: "",
+    };
 
     const total = payment.transaction_amount;
-    const payerEmail = payment.payer?.email || "Sin nombre";
+    const payment_method = payment.payment_method_id;
+    const payerEmail = payment.payer?.email || clientInfo.name;
 
-    // 1. Insertar la orden
+    // 1. Insertar orden
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
-        client: payerEmail,
+        client: clientInfo.name,
         status: "pending",
-        total,
+        total: null, // Se puede completar luego en el panel
         active: true,
+        whatsapp: clientInfo.whatsapp,
+        address: clientInfo.address,
       })
       .select()
       .single();
 
     if (orderError) throw orderError;
 
-    // 2. Insertar la venta
+    // 2. Insertar venta
     const { data: sale, error: saleError } = await supabase
       .from("sales")
       .insert({
         total,
-        payment_method: "mercado_pago",
-        customer_name: payerEmail,
+        payment_method,
+        customer_name: clientInfo.name,
+        whatsapp: clientInfo.whatsapp,
       })
       .select()
       .single();
 
     if (saleError) throw saleError;
 
-    // 3. Procesar ítems
+    // 3. Insertar ítems
     for (const item of items) {
-      // Simulamos obtener product_id desde el título (opcional: podés usar external_reference)
-      const { data: product, error: productError } = await supabase
-        .from("products")
-        .select("id")
-        .ilike("product", `%${item.title}%`)
-        .single();
-
-      if (productError) continue; // o manejar error
-
-      const productId = product.id;
+      const productId = item.product.id;
 
       await supabase.from("order_items").insert({
         order_id: order.id,
         product_id: productId,
         quantity: item.quantity,
-        unit_price: item.unit_price,
-        discount: 0,
       });
 
       await supabase.from("sale_items").insert({
@@ -95,7 +93,11 @@ export async function POST(req) {
         product_id: productId,
         quantity: item.quantity,
         unit_price: item.unit_price,
-        discount: 0,
+        discount: item.discount || 0,
+        color: item.color || null,
+        ampere: item.ampere || null,
+        watts: item.watts || null,
+        voltage: item.voltage || null,
       });
 
       await supabase.rpc("decrease_stock", {
