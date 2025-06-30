@@ -9,7 +9,11 @@ export const useCartStore = create(
       addToCart: (item) => {
         const existing = get().cart.find(
           (p) =>
-            p.id === item.id && p.color === item.color && p.watts === item.watts
+            p.id === item.id &&
+            p.color === item.color &&
+            p.watts === item.watts &&
+            p.ampere === item.ampere &&
+            p.voltage === item.voltage
         );
 
         if (existing) {
@@ -17,7 +21,9 @@ export const useCartStore = create(
             cart: get().cart.map((p) =>
               p.id === item.id &&
               p.color === item.color &&
-              p.watts === item.watts
+              p.watts === item.watts &&
+              p.ampere === item.ampere &&
+              p.voltage === item.voltage
                 ? { ...p, quantity: p.quantity + item.quantity }
                 : p
             ),
@@ -27,11 +33,15 @@ export const useCartStore = create(
         }
       },
 
-      removeFromCart: (id, color, watts) => {
+      removeFromCart: (id, color, watts, ampere, voltage) => {
         set({
           cart: get().cart.filter(
             (item) =>
-              item.id !== id || item.color !== color || item.watts !== watts
+              item.id !== id ||
+              item.color !== color ||
+              item.watts !== watts ||
+              item.ampere !== ampere ||
+              item.voltage !== voltage
           ),
         });
       },
@@ -39,7 +49,7 @@ export const useCartStore = create(
       clearCart: () => set({ cart: [] }),
     }),
     {
-      name: "cart-storage", // clave en localStorage
+      name: "cart-storage",
     }
   )
 );

@@ -12,7 +12,10 @@ import {
   TextField,
   InputAdornment,
   CircularProgress,
+  Alert,
+  AlertTitle,
 } from "@mui/material";
+import { ShoppingCart } from "@mui/icons-material";
 import { createPreference } from "@/app/checkout/actions"; // 🚨 importá el server action
 import { useTransition } from "react";
 import formatPrice from "@/lib/client/formatters/formatPrice";
@@ -71,12 +74,13 @@ export default function CheckoutPage() {
       window.location.href = url; // redirige a Mercado Pago
     });
   };
+  console.log(cart);
 
   return (
     <main>
       {loading ? (
         <CircularProgress size={40} sx={{ m: "auto" }} />
-      ) : (
+      ) : cart.length ? (
         <Box
           sx={{
             maxWidth: "30rem",
@@ -221,6 +225,18 @@ export default function CheckoutPage() {
               )}
             </Button>
           </Box>
+        </Box>
+      ) : (
+        <Box sx={{ mt: 4 }}>
+          <Alert
+            icon={<ShoppingCart fontSize="inherit" />}
+            severity="info"
+            variant="outlined"
+            color="primary"
+          >
+            <AlertTitle>Carrito vacío</AlertTitle>
+            Agregá productos para iniciar tu compra.
+          </Alert>
         </Box>
       )}
     </main>
