@@ -10,7 +10,6 @@ export async function POST(req) {
   try {
     const body = await req.json();
     const paymentId = body?.data?.id || body?.resource;
-    console.warn("body:", body);
 
     if (body.topic !== "payment") {
       console.log("🔕 Topic no manejado:", body.topic);
@@ -85,6 +84,7 @@ export async function POST(req) {
 
     if (saleError) throw saleError;
 
+    console.warn("items:", items);
     // 3. Insertar ítems
     for (const item of items) {
       const productId = item.product.id;
