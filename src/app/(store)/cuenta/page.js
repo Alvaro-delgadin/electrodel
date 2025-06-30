@@ -11,6 +11,11 @@ import {
   CircularProgress,
   Alert,
   InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import { Logout, Delete } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
@@ -19,6 +24,7 @@ export default function Account() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
+  const [openConfirm, setOpenConfirm] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -45,6 +51,7 @@ export default function Account() {
     const { name, value } = e.target;
 
     if (name === "whatsapp") {
+      if (!value) return;
       // Limpiamos cualquier prefijo +54 o +, luego volvemos a agregar +54
       const clean = value.replace(/^\+?54/, "").replace(/[^\d]/g, "");
       setForm((prev) => ({ ...prev, whatsapp: `+54${clean}` }));
@@ -90,34 +97,39 @@ export default function Account() {
   };
 
   const handleDeleteAccount = async () => {
-    const confirm = window.confirm(
-      "¿Estás seguro de que querés borrar tu cuenta? Esta acción es permanente."
-    );
-    if (!confirm) return;
+    setMessage(null); // limpiamos mensajes previos
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-    if (userError || !user) {
-      alert("No se pudo obtener el usuario");
-      return;
-    }
+      if (userError || !user) {
+        setMessage({ type: "error", text: "No se pudo obtener el usuario." });
+        return;
+      }
 
-    const res = await fetch("/api/delete-account", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: user.id }),
-    });
+      const { error: deleteError } = await supabase
+        .from("profiles")
+        .delete()
+        .eq("id", user.id);
 
-    const data = await res.json();
+      if (deleteError) {
+        setMessage({
+          type: "error",
+          text: "Error al borrar el perfil: " + deleteError.message,
+        });
+        return;
+      }
 
-    if (data.success) {
       await supabase.auth.signOut();
       router.push("/ingresar");
-    } else {
-      alert("Error al borrar la cuenta: " + data.error);
+    } catch (err) {
+      console.error(err);
+      setMessage({ type: "error", text: "Ocurrió un error inesperado." });
+    } finally {
+      setOpenConfirm(false);
     }
   };
 
@@ -157,7 +169,7 @@ export default function Account() {
               fullWidth
               label="WhatsApp"
               name="whatsapp"
-              value={form.whatsapp.replace(/^\+54/, "")}
+              value={form.whatsapp?.replace(/^\+54/, "")}
               onChange={handleChange}
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleChange(e);
@@ -210,11 +222,30 @@ export default function Account() {
             <Button
               variant="outlined"
               color="error"
-              onClick={handleDeleteAccount}
+              onClick={() => setOpenConfirm(true)}
               startIcon={<Delete />}
             >
               Borrar cuenta
             </Button>
+            <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
+              <DialogTitle>¿Eliminar cuenta?</DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  Esta acción es permanente y no se puede deshacer. ¿Deseás
+                  continuar?
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setOpenConfirm(false)}>Cancelar</Button>
+                <Button
+                  onClick={handleDeleteAccount}
+                  color="error"
+                  variant="contained"
+                >
+                  Sí, borrar
+                </Button>
+              </DialogActions>
+            </Dialog>
           </Box>
         </Container>
       )}
