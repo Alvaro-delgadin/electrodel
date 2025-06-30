@@ -10,6 +10,7 @@ export async function POST(req) {
   try {
     const body = await req.json();
     const paymentId = body?.data?.id;
+    console.log(body);
 
     if (!paymentId) {
       return NextResponse.json(

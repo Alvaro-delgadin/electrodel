@@ -2,20 +2,20 @@
 import { Box, Typography, Button } from "@mui/material";
 import { ArrowBack, WhatsApp } from "@mui/icons-material";
 import Link from "next/link";
-import supabase from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabaseClient.js";
 import { useEffect, useState } from "react";
 import { useCartStore } from "@/app/stores/cartStore";
 export default function SuccessPage() {
   const clearCart = useCartStore((state) => state.clearCart);
   const [whatsapp, setWhatsapp] = useState("");
 
+  const fetchData = async () => {
+    const {
+      data: { whatsapp },
+    } = await supabase.from("settings").select("whatsapp").single();
+    setWhatsapp(whatsapp);
+  };
   useEffect(() => {
-    const fetchData = async () => {
-      const {
-        data: { whatsapp },
-      } = await supabase.from("settings").select("whatsapp").single();
-      setWhatsapp(whatsapp);
-    };
     fetchData();
     clearCart();
   }, []);
