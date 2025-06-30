@@ -84,17 +84,14 @@ export async function POST(req) {
 
     if (saleError) throw saleError;
 
-    console.warn("items:", items);
     // 3. Insertar ítems
     for (const item of items) {
-      const productId = item.product.id;
-
       // 1. Insertar en order_items
       const { data: orderItem, error: orderItemError } = await supabase
         .from("order_items")
         .insert({
           order_id: order.id,
-          product_id: productId,
+          product_id: item.id,
           quantity: item.quantity,
         })
         .select()
@@ -107,9 +104,9 @@ export async function POST(req) {
         .from("sale_items")
         .insert({
           sale_id: sale.id,
-          product_id: productId,
+          product_id: item.id,
           quantity: item.quantity,
-          unit_price: item.unit_price,
+          unit_price: item.price,
           discount: item.discount || 0,
           color: item.color || null,
           ampere: item.ampere || null,
@@ -125,7 +122,7 @@ export async function POST(req) {
       const { data: stockResult, error: stockError } = await supabase.rpc(
         "decrease_stock",
         {
-          product_id: productId,
+          product_id: item.id,
           amount: item.quantity,
         }
       );
