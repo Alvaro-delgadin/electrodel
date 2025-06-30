@@ -12,7 +12,7 @@ import {
   Alert,
   InputAdornment,
 } from "@mui/material";
-import { Logout } from "@mui/icons-material";
+import { Logout, Delete } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 export default function Account() {
   const [form, setForm] = useState({ name: "", whatsapp: "", address: "" });
@@ -88,6 +88,39 @@ export default function Account() {
     await supabase.auth.signOut();
     router.push("/ingresar");
   };
+
+  const handleDeleteAccount = async () => {
+    const confirm = window.confirm(
+      "¿Estás seguro de que querés borrar tu cuenta? Esta acción es permanente."
+    );
+    if (!confirm) return;
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      alert("No se pudo obtener el usuario");
+      return;
+    }
+
+    const res = await fetch("/api/delete-account", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: user.id }),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      await supabase.auth.signOut();
+      router.push("/ingresar");
+    } else {
+      alert("Error al borrar la cuenta: " + data.error);
+    }
+  };
+
   return (
     <main>
       {loading ? (
@@ -165,7 +198,7 @@ export default function Account() {
               {saving ? <CircularProgress size={24} /> : "Guardar"}
             </Button>
           </Box>
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
             <Button
               variant="outlined"
               color="error"
@@ -173,6 +206,14 @@ export default function Account() {
               startIcon={<Logout />}
             >
               Cerrar sesión
+            </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleDeleteAccount}
+              startIcon={<Delete />}
+            >
+              Borrar cuenta
             </Button>
           </Box>
         </Container>
