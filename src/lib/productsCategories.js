@@ -47,5 +47,9 @@ const categories = [
       "Seguridad",
     ],
   },
+  {
+    category: "Herramientas",
+    subcategories: ["Herramientas manuales", "Herramientas eléctricas"],
+  },
 ];
 export default categories;

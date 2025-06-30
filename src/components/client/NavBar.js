@@ -4,7 +4,8 @@ import {
   Light,
   WbTwighlight,
   WbIncandescent,
-  Build,
+  Cable,
+  Handyman,
 } from "@mui/icons-material";
 import categories from "@/lib/productsCategories";
 import Link from "next/link";
@@ -15,7 +16,8 @@ export default function NavBar() {
     <WbTwighlight key={2} />,
     <WbIncandescent key={3} />,
     <ElectricalServices key={4} />,
-    <Build key={5} />,
+    <Cable key={5} />,
+    <Handyman key={6} />,
   ];
   return (
     <Box sx={{ display: { xs: "none", lg: "flex" }, gap: 2 }}>
@@ -41,7 +43,7 @@ export default function NavBar() {
                 flexDirection: "column",
                 justifyContent: "center",
                 color: "white",
-                fontSize: "1rem",
+                fontSize: "0.8rem",
               }}
             >
               {iconsInOrder[index]}
