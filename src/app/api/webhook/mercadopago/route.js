@@ -19,8 +19,10 @@ export async function POST(req) {
 
     if (!paymentId) {
       console.error("❌ No se encontró payment ID en el body:", body);
-      return NextResponse.json({ error: "Missing payment ID" }, { status: 400 });
-    }
+      return NextResponse.json(
+        { error: "Missing payment ID" },
+        { status: 400 }
+      );
     }
 
     // Consulta a MP
