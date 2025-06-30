@@ -3,6 +3,7 @@ const nextConfig = {
   reactStrictMode: false,
   devIndicators: false,
   images: {
+    domains: ["pbmvrjvjhablmelovyoc.supabase.co"],
     remotePatterns: [
       {
         protocol: "https",
