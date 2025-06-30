@@ -83,28 +83,48 @@ export async function POST(req) {
     for (const item of items) {
       const productId = item.product.id;
 
-      await supabase.from("order_items").insert({
-        order_id: order.id,
-        product_id: productId,
-        quantity: item.quantity,
-      });
+      // 1. Insertar en order_items
+      const { data: orderItem, error: orderItemError } = await supabase
+        .from("order_items")
+        .insert({
+          order_id: order.id,
+          product_id: productId,
+          quantity: item.quantity,
+        })
+        .select()
+        .single();
 
-      await supabase.from("sale_items").insert({
-        sale_id: sale.id,
-        product_id: productId,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-        discount: item.discount || 0,
-        color: item.color || null,
-        ampere: item.ampere || null,
-        watts: item.watts || null,
-        voltage: item.voltage || null,
-      });
+      if (orderItemError) throw orderItemError;
 
-      await supabase.rpc("decrease_stock", {
-        product_id: productId,
-        amount: item.quantity,
-      });
+      // 2. Insertar en sale_items
+      const { data: saleItem, error: saleItemError } = await supabase
+        .from("sale_items")
+        .insert({
+          sale_id: sale.id,
+          product_id: productId,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          discount: item.discount || 0,
+          color: item.color || null,
+          ampere: item.ampere || null,
+          watts: item.watts || null,
+          voltage: item.voltage || null,
+        })
+        .select()
+        .single();
+
+      if (saleItemError) throw saleItemError;
+
+      // 3. Disminuir stock
+      const { data: stockResult, error: stockError } = await supabase.rpc(
+        "decrease_stock",
+        {
+          product_id: productId,
+          amount: item.quantity,
+        }
+      );
+
+      if (stockError) throw stockError;
     }
 
     return NextResponse.json({ status: "success" });
