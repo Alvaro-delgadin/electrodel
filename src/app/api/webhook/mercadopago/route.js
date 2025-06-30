@@ -6,6 +6,10 @@ export async function POST(req) {
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
+  if (body.topic !== "payment") {
+    console.log("🔕 Topic no manejado:", body.topic);
+    return new NextResponse("Ignored", { status: 200 });
+  }
 
   try {
     const body = await req.json();
