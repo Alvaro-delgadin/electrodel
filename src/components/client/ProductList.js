@@ -6,7 +6,7 @@ import { useState } from "react";
 
 export default function ProductList({ products }) {
   const [page, setPage] = useState(1);
-  const PAGE_SIZE = 10;
+  const PAGE_SIZE = 50;
   const totalPages = Math.ceil(products.length / PAGE_SIZE);
 
   const from = (page - 1) * PAGE_SIZE;

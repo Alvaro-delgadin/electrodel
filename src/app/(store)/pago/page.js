@@ -74,7 +74,6 @@ export default function CheckoutPage() {
       window.location.href = url; // redirige a Mercado Pago
     });
   };
-  console.log(cart);
 
   return (
     <main>

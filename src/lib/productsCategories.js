@@ -7,6 +7,7 @@ const categories = [
       "Spots y empotrables",
       "Plafones",
       "Lámparas de pie o mesa",
+      "Tiras LED",
     ],
   },
   {
