@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import CustomToolbar from "@/components/admin/SalesToolbar.js";
 import { MenuOpen } from "@mui/icons-material";
-
+import formatPrice from "@/lib/client/formatters/formatPrice";
 export default function SalesTable() {
   const [rows, setRows] = useState([]);
   const [sync, setSync] = useState(false);
@@ -201,6 +201,16 @@ export default function SalesTable() {
                   <Box>
                     <Typography variant="subtitle1" fontWeight="bold">
                       {item.product_name}
+                    </Typography>
+                    <Typography color="text.secondary">
+                      Precio unitario: $ {formatPrice(item.unit_price)}
+                    </Typography>
+                    <Typography color="text.secondary">
+                      Descuento: {item.discount}%
+                    </Typography>
+                    <Typography color="text.secondary">
+                      Precio unitario con Descuento:{" "}
+                      {formatPrice(item.unit_price * (1 - item.discount / 100))}
                     </Typography>
                     <Typography color="text.secondary">
                       Cantidad: {item.quantity}
