@@ -12,7 +12,7 @@ import {
   Alert,
   InputAdornment,
 } from "@mui/material";
-export default function account() {
+export default function Account() {
   const [form, setForm] = useState({ name: "", whatsapp: "", address: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
