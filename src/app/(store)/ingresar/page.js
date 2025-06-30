@@ -8,24 +8,37 @@ import {
   TextField,
   Typography,
   CircularProgress,
+  Alert,
 } from "@mui/material";
 
 export default function Ingresar() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState(null); // { type: "success" | "error", text: string }
 
   const loginWithEmail = async () => {
-    if (!email) return alert("Ingresá un email válido");
+    if (!email) {
+      setMessage({ type: "error", text: "Ingresá un email válido." });
+      return;
+    }
+
     setLoading(true);
+    setMessage(null);
+
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         emailRedirectTo: "https://electrodel.com.ar/cuenta",
       },
     });
+
     setLoading(false);
-    if (error) alert(error.message);
-    else alert("Revisá tu correo para continuar");
+
+    if (error) {
+      setMessage({ type: "error", text: error.message });
+    } else {
+      setMessage({ type: "success", text: "Revisá tu correo para continuar." });
+    }
   };
 
   return (
@@ -43,6 +56,12 @@ export default function Ingresar() {
           <Typography variant="h5" mb={3}>
             Ingresar
           </Typography>
+
+          {message && (
+            <Alert severity={message.type} sx={{ mb: 2 }}>
+              {message.text}
+            </Alert>
+          )}
 
           <TextField
             fullWidth

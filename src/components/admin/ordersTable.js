@@ -286,32 +286,35 @@ export default function OrdersTable() {
           {!sync && orderItems.length ? (
             <List>
               {orderItems.map((item, index) => (
-                <ListItem key={index} divider>
-                  <ListItemText
-                    primary={item.product_name}
-                    secondary={
-                      <Box sx={{ display: "flex", flexDirection: "column" }}>
-                        <Typography variant="span" color="text.secondary">
-                          Cantidad: {item.quantity}
-                        </Typography>
-                        {item.color && (
-                          <Typography variant="span" color="text.secondary">
-                            Color: {item.color}
-                          </Typography>
-                        )}
-                        {item.ampere && (
-                          <Typography variant="span" color="text.secondary">
-                            Ampere: {item.ampere}
-                          </Typography>
-                        )}
-                        {item.voltage && (
-                          <Typography variant="span" color="text.secondary">
-                            Voltage: {item.voltage}
-                          </Typography>
-                        )}
-                      </Box>
-                    }
-                  />
+                <ListItem key={index} divider alignItems="flex-start">
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      {item.product_name}
+                    </Typography>
+                    <Typography color="text.secondary">
+                      Cantidad: {item.quantity}
+                    </Typography>
+                    {item.color && (
+                      <Typography color="text.secondary">
+                        Color: {item.color}
+                      </Typography>
+                    )}
+                    {item.ampere && (
+                      <Typography color="text.secondary">
+                        Corriente (A): {item.ampere}
+                      </Typography>
+                    )}
+                    {item.voltage && (
+                      <Typography color="text.secondary">
+                        Tensión (V): {item.voltage}
+                      </Typography>
+                    )}
+                    {item.watts && (
+                      <Typography color="text.secondary">
+                        Potencia: {item.watts}W
+                      </Typography>
+                    )}
+                  </Box>
                 </ListItem>
               ))}
             </List>
