@@ -44,6 +44,7 @@ const categories = [
       "Controladores y dimmers",
       "Fichas y adaptadores",
       "Herramientas y consumibles",
+      "Seguridad",
     ],
   },
 ];

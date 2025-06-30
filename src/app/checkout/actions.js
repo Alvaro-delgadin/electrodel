@@ -14,14 +14,13 @@ const preference = new Preference(client);
  * @param {Array} cart - Lista de productos del carrito
  * @returns {string} init_point - URL de pago de Mercado Pago
  */
-export async function createPreference(cart) {
+export async function createPreference(cart, clientData) {
   try {
     const items = cart.map((item) => ({
       title: normalizeTitle(item),
       quantity: item.quantity,
       unit_price: Math.round(item.price * (1 - item.discount / 100)), // MercadoPago solo acepta int si es ARS
     }));
-    console.log(items);
 
     const result = await preference.create({
       body: {
@@ -33,6 +32,10 @@ export async function createPreference(cart) {
         },
         auto_return: "approved",
         notification_url: "https://electrodel.com.ar/api/webhook/mercadopago",
+      },
+      metadata: {
+        items: cart,
+        client: clientData,
       },
     });
 

@@ -10,6 +10,7 @@ import {
   Typography,
   CircularProgress,
   Alert,
+  InputAdornment,
 } from "@mui/material";
 export default function account() {
   const [form, setForm] = useState({ name: "", whatsapp: "", address: "" });
@@ -39,7 +40,14 @@ export default function account() {
   }, []);
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "whatsapp") {
+      // Limpiamos cualquier prefijo +54 o +, luego volvemos a agregar +54
+      const clean = value.replace(/^\+?54/, "").replace(/[^\d]/g, "");
+      setForm((prev) => ({ ...prev, whatsapp: `+54${clean}` }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleGuardar = async () => {
@@ -73,62 +81,85 @@ export default function account() {
     setSaving(false);
   };
 
-  if (loading) return <div>Cargando perfil...</div>;
-
   return (
-    <Container maxWidth="sm" sx={{ mt: 6 }}>
-      <Box
-        sx={{
-          p: 4,
-          bgcolor: "white",
-          borderRadius: 2,
-          boxShadow: 2,
-        }}
-      >
-        <Typography variant="h6" mb={3}>
-          Editar perfil
-        </Typography>
+    <main>
+      {loading ? (
+        <CircularProgress size={40} sx={{ m: "auto" }} />
+      ) : (
+        <Container maxWidth="sm" sx={{ mt: 6 }}>
+          <Typography sx={{ mb: "1rem", fontSize: "1.5rem" }}>
+            Mi cuenta
+          </Typography>
+          <Box
+            sx={{
+              p: 4,
+              bgcolor: "white",
+              borderRadius: 2,
+              boxShadow: 2,
+            }}
+          >
+            <Typography variant="h6" mb={3}>
+              Datos
+            </Typography>
 
-        <TextField
-          fullWidth
-          label="Nombre"
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          sx={{ mb: 2 }}
-        />
-        <TextField
-          fullWidth
-          label="WhatsApp"
-          name="whatsapp"
-          value={form.whatsapp}
-          onChange={handleChange}
-          sx={{ mb: 2 }}
-        />
-        <TextField
-          fullWidth
-          label="Dirección de envío"
-          name="address"
-          value={form.address}
-          onChange={handleChange}
-          sx={{ mb: 3 }}
-        />
+            <TextField
+              fullWidth
+              label="Nombre"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleChange(e);
+              }}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="WhatsApp"
+              name="whatsapp"
+              value={form.whatsapp.replace(/^\+54/, "")}
+              onChange={handleChange}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleChange(e);
+              }}
+              sx={{ mb: 2 }}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">+54</InputAdornment>
+                  ),
+                },
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Dirección de envío"
+              name="address"
+              value={form.address}
+              onChange={handleChange}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleChange(e);
+              }}
+              sx={{ mb: 3 }}
+            />
 
-        {message && (
-          <Alert severity={message.type} sx={{ mb: 2 }}>
-            {message.text}
-          </Alert>
-        )}
+            {message && (
+              <Alert severity={message.type} sx={{ mb: 2 }}>
+                {message.text}
+              </Alert>
+            )}
 
-        <Button
-          variant="contained"
-          fullWidth
-          onClick={handleGuardar}
-          disabled={saving}
-        >
-          {saving ? <CircularProgress size={24} /> : "Guardar"}
-        </Button>
-      </Box>
-    </Container>
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={handleGuardar}
+              disabled={saving}
+            >
+              {saving ? <CircularProgress size={24} /> : "Guardar"}
+            </Button>
+          </Box>
+        </Container>
+      )}
+    </main>
   );
 }
