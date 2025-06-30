@@ -10,7 +10,7 @@ export async function POST(req) {
   try {
     const body = await req.json();
     const paymentId = body?.data?.id || body?.resource;
-    console.log(body);
+    console.warn("body:", body);
 
     if (body.topic !== "payment") {
       console.log("🔕 Topic no manejado:", body.topic);
