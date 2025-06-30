@@ -93,6 +93,11 @@ export async function POST(req) {
           order_id: order.id,
           product_id: item.id,
           quantity: item.quantity,
+          color: item.color || null,
+          ampere: item.ampere || null,
+          watts: item.watts || null,
+          voltage: item.voltage || null,
+          product_name: item.product,
         })
         .select()
         .single();

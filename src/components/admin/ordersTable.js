@@ -3,9 +3,20 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { DataGrid, GridActionsCellItem, useGridApiRef } from "@mui/x-data-grid";
 import { esES } from "@mui/x-data-grid/locales";
-import { Tooltip } from "@mui/material";
+import {
+  Tooltip,
+  Button,
+  Drawer,
+  IconButton,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+  Box,
+} from "@mui/material";
 import CustomToolbar from "@/components/admin/ordersToolbar.js";
-import { Save, Cancel, Delete } from "@mui/icons-material";
+import { Save, Cancel, Delete, MenuOpen } from "@mui/icons-material";
 import { createActions } from "@/lib/crud/crud";
 
 export default function OrdersTable() {
@@ -17,6 +28,9 @@ export default function OrdersTable() {
   const apiRef = useGridApiRef();
   const channelRef = useRef(null);
   const isSubscribed = useRef(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [orderItems, setOrderItems] = useState([]);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -64,7 +78,58 @@ export default function OrdersTable() {
     };
   }, []);
 
+  async function handleOpenDrawer(row) {
+    setSync(true);
+    setDrawerOpen(true);
+    setSelectedOrderId(row.id);
+
+    const { data, error } = await supabase
+      .from("order_items")
+      .select(
+        `
+    quantity,
+      color,
+      watts,
+      ampere,
+      voltage,
+      product_name
+  `
+      )
+      .eq("order_id", row.id);
+
+    if (error) {
+      console.error("Error al obtener productos del pedido:", error);
+      setSync(false);
+      return;
+    }
+    setSync(false);
+    setOrderItems(data);
+  }
+
+  function handleCloseDrawer() {
+    setDrawerOpen(false);
+    setSelectedOrderId(null);
+    setOrderItems([]);
+  }
   const columns = [
+    {
+      field: "showOrder",
+      headerName: "Ver pedido",
+      type: "text",
+      nullable: true,
+      width: 100,
+      editable: false,
+      renderCell: (params) => {
+        return (
+          <Button
+            style={{ minWidth: "100%", minHeight: "100%" }}
+            onClick={() => handleOpenDrawer(params.row)}
+          >
+            <MenuOpen />
+          </Button>
+        );
+      },
+    },
     {
       field: "client",
       headerName: "Cliente",
@@ -121,6 +186,8 @@ export default function OrdersTable() {
             });
       },
     },
+    { field: "whatsapp", headerName: "WhatsApp", type: "text", nullable: true },
+    { field: "address", headerName: "Dirección", type: "text", nullable: true },
     { field: "id", headerName: "id", type: "text", nullable: true },
     {
       field: "actions",
@@ -208,6 +275,46 @@ export default function OrdersTable() {
           },
         }}
       />
+      <Drawer anchor="right" open={drawerOpen} onClose={handleCloseDrawer}>
+        <div style={{ width: 400, padding: 24 }}>
+          <Typography variant="h6" gutterBottom>
+            Productos del pedido
+          </Typography>
+
+          <Divider style={{ marginBottom: 16 }} />
+
+          {!sync && orderItems.length ? (
+            <List>
+              {orderItems.map((item, index) => (
+                <ListItem key={index} divider>
+                  <ListItemText
+                    primary={`${item.product_name} (${
+                      item.color || "Sin color"
+                    })`}
+                    secondary={
+                      <>
+                        <Box>Cantidad: {item.quantity}</Box>
+                        {item.watts && <Box>Watts: {item.watts}</Box>}
+                        {item.ampere && <Box>Ampere: {item.ampere}</Box>}
+                        {item.voltage && <Box>Voltage: {item.voltage}</Box>}
+                      </>
+                    }
+                  />
+                </ListItem>
+              ))}
+            </List>
+          ) : (
+            ""
+          )}
+          {!sync && !orderItems.length ? (
+            <Typography color="text.secondary">
+              No se encontraron productos para este pedido.
+            </Typography>
+          ) : (
+            ""
+          )}
+        </div>
+      </Drawer>
     </div>
   );
 }
