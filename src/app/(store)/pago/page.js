@@ -129,6 +129,7 @@ export default function CheckoutPage() {
                       />
                     </ListItemAvatar>
                     <ListItemText
+                      sx={{ mr: "0.5rem" }}
                       primary={`${item.product}${
                         detalles.length ? " — " + detalles.join(", ") : ""
                       }`}
