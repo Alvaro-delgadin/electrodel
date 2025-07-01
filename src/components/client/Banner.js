@@ -13,7 +13,7 @@ export default function Banner({ message }) {
         zIndex: 1000,
       }}
     >
-      <Marquee speed={100} direction="right" pauseOnHover={true}>
+      <Marquee speed={100} direction="left" pauseOnHover={true}>
         <Typography sx={{ mx: 4, fontWeight: "bold" }}>{message}</Typography>
       </Marquee>
     </Box>

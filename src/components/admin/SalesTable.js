@@ -17,6 +17,7 @@ import {
 import CustomToolbar from "@/components/admin/SalesToolbar.js";
 import { MenuOpen } from "@mui/icons-material";
 import formatPrice from "@/lib/client/formatters/formatPrice";
+import { createActions } from "@/lib/crud/crud";
 export default function SalesTable() {
   const [rows, setRows] = useState([]);
   const [sync, setSync] = useState(false);
@@ -24,6 +25,8 @@ export default function SalesTable() {
   const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedSaleId, setSelectedSaleId] = useState(null);
+  const requestLock = useRef(false);
+  const apiRef = useGridApiRef();
   const [saleItems, setSaleItems] = useState([]);
 
   useEffect(() => {
@@ -161,15 +164,28 @@ export default function SalesTable() {
     { field: "id", headerName: "id", type: "text", nullable: true },
   ];
 
+  const action = createActions(
+    "orders",
+    "pedido",
+    supabase,
+    apiRef,
+    setSync,
+    setError,
+    requestLock,
+    columns
+  );
   return (
     <div className="tableContainer">
       <DataGrid
+        apiRef={apiRef}
         rows={rows}
         columns={columns}
         loading={loading}
         sortModel={[{ field: "created_at", sort: "desc" }]}
         disableRowSelectionOnClick
         disableVirtualization
+        processRowUpdate={action.rowUpdate}
+        onProcessRowUpdateError={(error) => setError(error.message)}
         localeText={{
           ...esES.components.MuiDataGrid.defaultProps.localeText,
           noRowsLabel: "Sin ventas",

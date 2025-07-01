@@ -32,22 +32,26 @@ export default function OrdersTable() {
   const [orderItems, setOrderItems] = useState([]);
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("*")
-        .eq("active", true)
-        .order("created_at", { ascending: false });
-      if (data) {
-        setRows(data);
-        setLoading(false);
-      } else {
-        setError(error.code);
-      }
-    };
-
     fetchOrders();
+    connectRealtime();
 
+    return () => disconnectRealtime();
+  }, []);
+
+  const fetchOrders = async () => {
+    const { data, error } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("active", true)
+      .order("created_at", { ascending: false });
+    if (data) {
+      setRows(data);
+      setLoading(false);
+    } else {
+      setError(error.code);
+    }
+  };
+  const connectRealtime = () => {
     if (isSubscribed.current) return;
 
     const channel = supabase
@@ -67,16 +71,14 @@ export default function OrdersTable() {
 
     channelRef.current = channel;
     isSubscribed.current = true;
-
-    return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-        isSubscribed.current = false;
-      }
-    };
-  }, []);
-
+  };
+  const disconnectRealtime = () => {
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+      isSubscribed.current = false;
+    }
+  };
   async function handleOpenDrawer(row) {
     setSync(true);
     setDrawerOpen(true);
