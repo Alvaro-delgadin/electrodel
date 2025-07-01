@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, useGridApiRef } from "@mui/x-data-grid";
 import { esES } from "@mui/x-data-grid/locales";
 import {
   Tooltip,
@@ -67,7 +67,7 @@ export default function SalesTable() {
       .eq("sale_id", row.id);
 
     if (error) {
-      console.error("Error al obtener productos de la venta:", error);
+      setError("Error al obtener productos de la venta:", error);
       setSync(false);
       return;
     }
@@ -165,8 +165,8 @@ export default function SalesTable() {
   ];
 
   const action = createActions(
-    "orders",
-    "pedido",
+    "sales",
+    "venta",
     supabase,
     apiRef,
     setSync,

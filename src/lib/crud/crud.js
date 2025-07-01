@@ -93,7 +93,7 @@ export function createActions(
         if (table === "products") validateRowIsDuplicate(newRow, rows);
         setSync("Actualizando");
         apiRef.current.updateRows([newRow]);
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from(table)
           .update({ [changedField]: updatedValue })
           .eq("id", newRow.id);
