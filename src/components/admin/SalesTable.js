@@ -167,7 +167,7 @@ export default function SalesTable() {
       type: "text",
       nullable: true,
       editable: false,
-      width: 100,
+      width: 150,
     },
   ];
 
