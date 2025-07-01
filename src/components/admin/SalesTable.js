@@ -161,7 +161,13 @@ export default function SalesTable() {
       editable: true,
       width: 150,
     },
-    { field: "id", headerName: "id", type: "text", nullable: true },
+    {
+      field: "mercadopago_id",
+      headerName: "Id de Mercado Pago",
+      type: "text",
+      nullable: true,
+      editable: false,
+    },
   ];
 
   const action = createActions(
