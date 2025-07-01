@@ -76,7 +76,7 @@ export async function POST(req) {
       .insert({
         total,
         payment_method,
-        mercadopago_id: body.data.id,
+        mercadopago_id: body?.data?.id,
         customer_name: clientInfo.name,
         whatsapp: clientInfo.whatsapp,
       })
