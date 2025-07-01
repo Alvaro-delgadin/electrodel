@@ -1,21 +1,21 @@
 import { Box, Typography } from "@mui/material";
-
-export default async function Banner({ message }) {
+import Marquee from "react-fast-marquee";
+export default function Banner({ message }) {
   return (
     <Box
       sx={{
         width: "100%",
         backgroundColor: "black",
         color: "#fff",
-        textAlign: "center",
-        py: "0.75rem",
-        px: "1rem",
+        p: "0.5rem 0",
         fontWeight: "bold",
         fontSize: "1rem",
         zIndex: 1000,
       }}
     >
-      <Typography>{message}</Typography>
+      <Marquee speed={50} direction="right" pauseOnHover={true}>
+        <Typography sx={{ mx: 4 }}>{message}</Typography>
+      </Marquee>
     </Box>
   );
 }
