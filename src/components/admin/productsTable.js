@@ -13,16 +13,12 @@ import {
   IconButton,
 } from "@mui/material";
 import CustomToolbar from "@/components/admin/productsToolbar.js";
-import {
-  Save,
-  Cancel,
-  Image,
-  Upload,
-  Close,
-  ContentCopy,
-} from "@mui/icons-material";
+import { Save, Cancel, Upload, Close, ContentCopy } from "@mui/icons-material";
+import ImageIcon from "@mui/icons-material/Image";
 import { createActions } from "@/lib/crud/crud";
 import categories from "@/lib/productsCategories";
+import Image from "next/image";
+
 export default function ProductsTable() {
   const [loading, setLoading] = useState(true);
   const [sync, setSync] = useState(false);
@@ -251,7 +247,9 @@ export default function ProductsTable() {
             }}
             onClick={() => handleOpenImageModal(params.row)}
           >
-            <img
+            <Image
+              width={50}
+              height={50}
               src={firstImage}
               alt="producto"
               style={{
@@ -267,7 +265,7 @@ export default function ProductsTable() {
             style={{ minWidth: "100%", minHeight: "100%" }}
             onClick={() => handleOpenImageModal(params.row)}
           >
-            <Image
+            <ImageIcon
               sx={{
                 margin: "auto",
                 fontSize: 20,
@@ -548,9 +546,11 @@ export default function ProductsTable() {
                           }}
                         >
                           {img ? (
-                            <img
+                            <Image
                               src={img}
                               alt={`img-${index}`}
+                              width={200}
+                              height={200}
                               style={{
                                 width: "100%",
                                 height: "100%",

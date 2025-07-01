@@ -1,5 +1,5 @@
 "use client";
-import styles from "@/styles/admin/sidebar.module.css";
+import styles from "@/styles/admin/Navbar.module.css";
 import Link from "next/link";
 import { NAV_ITEMS } from "@/lib/navigation";
 import { usePathname } from "next/navigation";
@@ -42,7 +42,17 @@ export default function Navbar() {
           loading && !offline ? "skeleton" : ""
         }`}
       >
-        {logo ? <img src={logo} alt="Logo" className={styles.logo} /> : ""}
+        {logo ? (
+          <Image
+            src={logo}
+            width={200}
+            height={150}
+            alt="Logo"
+            className={styles.logo}
+          />
+        ) : (
+          ""
+        )}
       </div>
       <nav className={styles.navbar}>
         {NAV_ITEMS.map((item, index) => (

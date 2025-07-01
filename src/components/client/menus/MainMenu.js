@@ -27,13 +27,16 @@ export default function MainMenu({ setOpen, products }) {
   }, []);
   useEffect(() => {
     if (query?.length) {
-      const filtered = groupedProducts.filter((variants) =>
-        normalizeText(variants[0].product).includes(normalizeText(query))
-      );
-      setFiltered(filtered);
+      filter();
     }
   }, [query]);
 
+  const filter = () => {
+    const filtered = groupedProducts.filter((variants) =>
+      normalizeText(variants[0].product).includes(normalizeText(query))
+    );
+    setFiltered(filtered);
+  };
   const normalizeText = (text) =>
     text
       .normalize("NFD")
