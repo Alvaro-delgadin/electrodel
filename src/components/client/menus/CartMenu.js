@@ -107,7 +107,7 @@ export default function CartMenu({ setOpen }) {
               {/* Botón eliminar */}
               <IconButton
                 edge="end"
-                onClick={() => removeFromCart(item.id, item.color, item.watts)}
+                onClick={() => removeFromCart(item)}
               >
                 <Delete />
               </IconButton>

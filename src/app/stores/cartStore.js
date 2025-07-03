@@ -33,7 +33,8 @@ export const useCartStore = create(
         }
       },
 
-      removeFromCart: (id, color, watts, ampere, voltage) => {
+      removeFromCart: (item) => {
+        const {id, color, watts, ampere, voltage} = item
         set({
           cart: get().cart.filter(
             (item) =>
