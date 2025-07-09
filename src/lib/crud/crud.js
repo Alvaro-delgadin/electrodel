@@ -235,8 +235,7 @@ export function createActions(
       setSync("Subiendo imagen");
       setError(false);
       try {
-        const fileExt = file.name.split(".").pop();
-        const fileName = `product_${Date.now()}.${fileExt}`;
+        const fileName = `product_${Date.now()}.webp`;
         const filePath = `product-image/${fileName}`;
         const compressedFile = await imageCompression(file, {
           maxWidthOrHeight: 900,
