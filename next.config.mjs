@@ -3,6 +3,7 @@ const nextConfig = {
   reactStrictMode: false,
   devIndicators: false,
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
