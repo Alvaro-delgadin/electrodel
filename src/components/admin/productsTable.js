@@ -309,7 +309,7 @@ export default function ProductsTable() {
       headerName: "id",
       type: "text",
       nullable: true,
-      editable: true,
+      editable: false,
     },
   ];
 
