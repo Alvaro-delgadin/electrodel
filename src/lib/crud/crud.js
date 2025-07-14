@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import readExcelFile from "@/lib/excel/import";
+import imageCompression from "browser-image-compression";
 import validateCellChange from "../validations/validateCellChange";
 import validateNewRowRequired from "../validations/validateNewRowRequired";
 import validateNewRowNegative from "../validations/validateNewRowNegative";
@@ -234,12 +235,16 @@ export function createActions(
       setSync("Subiendo imagen");
       setError(false);
       try {
-        const fileExt = file.name.split(".").pop();
-        const fileName = `product_${Date.now()}.${fileExt}`;
+        const fileName = `product_${Date.now()}.webp`;
         const filePath = `product-image/${fileName}`;
+        const compressedFile = await imageCompression(file, {
+          maxWidthOrHeight: 900,
+          initialQuality: 0.85,
+          fileType: "image/webp",
+        });
         const { error: uploadError } = await supabase.storage
           .from("assets")
-          .upload(filePath, file);
+          .upload(filePath, compressedFile);
         if (uploadError) {
           throw new Error(uploadError.message);
         }

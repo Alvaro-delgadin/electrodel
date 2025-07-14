@@ -34,7 +34,17 @@ export async function createPreference(cart, clientData) {
         notification_url: "https://electrodel.com.ar/api/webhook/mercadopago",
         statement_descriptor: "ELECTRODEL",
         metadata: {
-          items: cart,
+          items: cart.map((item) => ({
+            id: item.id,
+            quantity: item.quantity,
+            color: item.color,
+            ampere: item.ampere,
+            watts: item.watts,
+            voltage: item.voltage,
+            product: item.product,
+            price: item.price,
+            discount: item.discount,
+          })),
           client: clientData,
         },
       },
