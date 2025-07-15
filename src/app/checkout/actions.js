@@ -47,6 +47,12 @@ export async function createPreference(cart, clientData) {
           })),
           client: clientData,
         },
+        payer: {
+          email:
+            process.env.NODE_ENV === "production"
+              ? clientData.email // e-mail real
+              : "test_user_846104187@testuser.com", // sandbox
+        },
       },
     });
 

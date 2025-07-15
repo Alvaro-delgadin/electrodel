@@ -26,7 +26,12 @@ import { useEffect, useState } from "react";
 export default function CheckoutPage() {
   const { cart } = useCartStore();
   const [isPending, startTransition] = useTransition();
-  const [form, setForm] = useState({ name: "", whatsapp: "", address: "" });
+  const [form, setForm] = useState({
+    name: "",
+    whatsapp: "",
+    address: "",
+    email: "",
+  });
   const [loading, setLoading] = useState(true);
 
   const total = cart.reduce(
@@ -47,7 +52,7 @@ export default function CheckoutPage() {
 
       const { data, error } = await supabase
         .from("profiles")
-        .select("name, whatsapp, address")
+        .select("name, whatsapp, address, email")
         .eq("id", user.id)
         .single();
 
@@ -57,7 +62,8 @@ export default function CheckoutPage() {
 
     fetchProfile();
   }, []);
-  const isFormComplete = form.name && form.whatsapp.length > 6 && form.address;
+  const isFormComplete =
+    form.name && form.whatsapp.length > 6 && form.address && form.email;
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "whatsapp") {
@@ -188,6 +194,13 @@ export default function CheckoutPage() {
               label="Dirección de envío"
               name="address"
               value={form.address}
+              onChange={handleChange}
+              required
+            />
+            <TextField
+              label="Correo electrónico"
+              name="email"
+              value={form.email}
               onChange={handleChange}
               required
             />
