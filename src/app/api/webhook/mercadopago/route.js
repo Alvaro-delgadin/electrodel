@@ -36,6 +36,7 @@ export async function POST(req) {
       }
     );
 
+    console.warn(paymentRes);
     const payment = await paymentRes.json();
     if (payment.status !== "approved") {
       return NextResponse.json({
@@ -43,7 +44,6 @@ export async function POST(req) {
         reason: "Payment not approved",
       });
     }
-    console.warn(metadata);
 
     const items = payment.metadata?.items || [];
     const clientInfo = payment.metadata?.client || {
