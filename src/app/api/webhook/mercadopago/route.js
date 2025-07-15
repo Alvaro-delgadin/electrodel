@@ -23,6 +23,7 @@ export async function POST(req) {
       typeof body.action === "string";
 
     if (!isWebhookV1Payment) {
+      console.warn("ignored");
       return new NextResponse("Ignored", { status: 200 });
     }
     // Consulta a MP
