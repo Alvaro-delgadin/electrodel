@@ -229,7 +229,7 @@ export default function CheckoutPage() {
                 <CircularProgress size={20} color="inherit" />
               ) : (
                 <Image
-                  style={{ height: "3rem", width: "auto" }}
+                  style={{ height: "2rem", width: "auto" }}
                   width={100}
                   height={50}
                   alt="Mercado Pago Logo"
