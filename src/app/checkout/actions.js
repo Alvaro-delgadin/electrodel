@@ -54,8 +54,6 @@ export async function createPreference(cart, clientData) {
       },
     });
 
-    console.log(result);
-
     if (isProd) return result.init_point;
     else return result.sandbox_init_point;
   } catch (error) {
