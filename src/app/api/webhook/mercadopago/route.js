@@ -36,8 +36,6 @@ export async function POST(req) {
       }
     );
 
-    console.warn(paymentId);
-    console.warn(paymentRes);
     const payment = await paymentRes.json();
     if (payment.status !== "approved") {
       return NextResponse.json({
