@@ -10,6 +10,7 @@ export async function POST(req) {
   try {
     const body = await req.json();
     const paymentId = body?.data?.id || body?.resource;
+    console.log(body);
 
     if (body.topic !== "payment") {
       console.log("🔕 Topic no manejado:", body.topic);
@@ -49,7 +50,7 @@ export async function POST(req) {
       whatsapp: "",
       address: "",
     };
-    console.error(clientInfo);
+
     const total = payment.transaction_amount;
     const payment_method = payment.payment_method_id;
     const payerEmail = payment.payer?.email || clientInfo.name;
