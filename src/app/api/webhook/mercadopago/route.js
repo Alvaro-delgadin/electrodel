@@ -49,7 +49,7 @@ export async function POST(req) {
       whatsapp: "",
       address: "",
     };
-
+    console.error(clientInfo);
     const total = payment.transaction_amount;
     const payment_method = payment.payment_method_id;
     const payerEmail = payment.payer?.email || clientInfo.name;
