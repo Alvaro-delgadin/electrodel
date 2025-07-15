@@ -17,12 +17,14 @@ export async function POST(req) {
       return new NextResponse("Bad signature", { status: 401 });
     }
 
-    // (2) — Acepto **sólo** el evento final “payment.updated”
-    if (body.action !== "payment.updated") {
-      // evita duplicar “payment.created”
+    const isWebhookV1Payment =
+      body?.api_version === "v1" &&
+      body.type === "payment" &&
+      typeof body.action === "string";
+
+    if (!isWebhookV1Payment) {
       return new NextResponse("Ignored", { status: 200 });
     }
-
     // Consulta a MP
     const paymentRes = await fetch(
       `https://api.mercadopago.com/v1/payments/${paymentId}`,
