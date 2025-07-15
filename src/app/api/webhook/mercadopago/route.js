@@ -10,19 +10,21 @@ export async function POST(req) {
   try {
     const body = await req.json();
     const paymentId = body?.data?.id || body?.resource;
-    console.log(body);
 
-    if (body.topic !== "payment") {
-      console.log("🔕 Topic no manejado:", body.topic);
-      return new NextResponse("Ignored", { status: 200 });
+    const signature = req.headers.get("x-signature");
+    const requestId = req.headers.get("x-request-id"); // llega en todos los webhooks
+    if (
+      !signature ||
+      !requestId ||
+      !verifySignature(signature, requestId, body.data.id)
+    ) {
+      return new NextResponse("Bad signature", { status: 401 });
     }
 
-    if (!paymentId) {
-      console.error("❌ No se encontró payment ID en el body:", body);
-      return NextResponse.json(
-        { error: "Missing payment ID" },
-        { status: 400 }
-      );
+    // (2) — Acepto **sólo** el evento final “payment.updated”
+    if (body.action !== "payment.updated") {
+      // evita duplicar “payment.created”
+      return new NextResponse("Ignored", { status: 200 });
     }
 
     // Consulta a MP
