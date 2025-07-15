@@ -37,13 +37,13 @@ export async function POST(req) {
     );
 
     const payment = await paymentRes.json();
-
     if (payment.status !== "approved") {
       return NextResponse.json({
         status: "ignored",
         reason: "Payment not approved",
       });
     }
+    console.warn(metadata);
 
     const items = payment.metadata?.items || [];
     const clientInfo = payment.metadata?.client || {
