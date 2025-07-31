@@ -76,24 +76,9 @@ export async function POST(req) {
       console.log("🛑 Sale already processed:", paymentId);
       return NextResponse.json({ status: "already_processed" });
     }
+    console.warn("llega");
 
-    // 1. Insertar orden
-    const { data: order, error: orderError } = await supabase
-      .from("orders")
-      .insert({
-        client: clientInfo.name,
-        status: "pending",
-        total: null, // Se puede completar luego en el panel
-        active: true,
-        whatsapp: clientInfo.whatsapp,
-        address: clientInfo.address,
-      })
-      .select()
-      .single();
-
-    if (orderError) throw orderError;
-
-    // 2. Insertar venta
+    // 1. Insertar venta
     const { data: sale, error: saleError } = await supabase
       .from("sales")
       .insert({
@@ -108,6 +93,21 @@ export async function POST(req) {
 
     if (saleError) throw saleError;
 
+    // 2. Insertar orden
+    const { data: order, error: orderError } = await supabase
+      .from("orders")
+      .insert({
+        client: clientInfo.name,
+        status: "pending",
+        total: null, // Se puede completar luego en el panel
+        active: true,
+        whatsapp: clientInfo.whatsapp,
+        address: clientInfo.address,
+      })
+      .select()
+      .single();
+
+    if (orderError) throw orderError;
     // 3. Insertar ítems
     for (const item of items) {
       // 1. Insertar en order_items
