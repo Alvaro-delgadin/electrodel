@@ -33,7 +33,6 @@ export async function createPreference(cart, clientData) {
         back_urls: {
           success: "https://electrodel.com.ar/pago/exito",
           failure: "https://electrodel.com.ar/pago/error",
-          pending: "https://electrodel.com.ar/pago/pendiente",
         },
         auto_return: "all",
         notification_url: webhookUrl,
