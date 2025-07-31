@@ -45,6 +45,7 @@ export async function POST(req) {
     );
 
     const payment = await paymentRes.json();
+    console.warn(payment);
     if (payment.status !== "approved") {
       return NextResponse.json({
         status: "ignored",
@@ -52,7 +53,6 @@ export async function POST(req) {
       });
     }
 
-    console.warn("supabase");
     const items = payment.metadata?.items || [];
     const clientInfo = payment.metadata?.client || {
       name: "Sin nombre",
