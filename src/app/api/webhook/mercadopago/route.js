@@ -10,7 +10,6 @@ export async function POST(req) {
   try {
     const body = await req.json();
     let paymentId = null;
-    console.warn("llega");
     if (body.type === "payment" && body.data?.id) {
       paymentId = body.data.id;
     } else {
@@ -53,6 +52,7 @@ export async function POST(req) {
       });
     }
 
+    console.warn("supabase");
     const items = payment.metadata?.items || [];
     const clientInfo = payment.metadata?.client || {
       name: "Sin nombre",
