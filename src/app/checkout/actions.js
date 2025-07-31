@@ -25,7 +25,7 @@ export async function createPreference(cart, clientData) {
     const webhookUrl = isProd
       ? "https://electrodel.com.ar/api/webhook/mercadopago"
       : "https://electrodel-test.vercel.app/api/webhook/mercadopago";
-    console.warn(process.env.VERCEL_ENV);
+    console.warn(webhookUrl);
 
     const result = await preference.create({
       body: {
