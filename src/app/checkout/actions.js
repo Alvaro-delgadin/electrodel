@@ -21,11 +21,11 @@ export async function createPreference(cart, clientData) {
       quantity: item.quantity,
       unit_price: Math.round(item.price * (1 - item.discount / 100)), // MercadoPago solo acepta int si es ARS
     }));
-    const isProd = process.env.NODE_ENV === "production";
+    const isProd = process.env.VERCEL_ENV === "production";
     const webhookUrl = isProd
       ? "https://electrodel.com.ar/api/webhook/mercadopago"
       : "https://electrodel-test.vercel.app/api/webhook/mercadopago";
-    console.warn(process.env.NODE_ENV);
+    console.warn(process.env.VERCEL_ENV);
 
     const result = await preference.create({
       body: {
