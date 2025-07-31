@@ -10,7 +10,7 @@ export async function POST(req) {
   try {
     const body = await req.json();
     let paymentId = null;
-
+    console.warn("llega");
     if (body.type === "payment" && body.data?.id) {
       paymentId = body.data.id;
     } else {
@@ -76,7 +76,6 @@ export async function POST(req) {
       console.log("🛑 Sale already processed:", paymentId);
       return NextResponse.json({ status: "already_processed" });
     }
-    console.warn("llega");
 
     // 1. Insertar venta
     const { data: sale, error: saleError } = await supabase
