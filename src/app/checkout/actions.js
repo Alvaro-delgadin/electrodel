@@ -21,7 +21,6 @@ export async function createPreference(cart, clientData) {
       quantity: item.quantity,
       unit_price: Math.round(item.price * (1 - item.discount / 100)), // MercadoPago solo acepta int si es ARS
     }));
-    const isProd = process.env.VERCEL_ENV === "production";
 
     const result = await preference.create({
       body: {
@@ -54,8 +53,7 @@ export async function createPreference(cart, clientData) {
       },
     });
 
-    if (isProd) return result.init_point;
-    else return result.sandbox_init_point;
+    return result.init_point;
   } catch (error) {
     console.error("Error al crear preference:", error);
     throw error;

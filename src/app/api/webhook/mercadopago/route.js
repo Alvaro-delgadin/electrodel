@@ -1,32 +1,41 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-export async function POST(req) {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  );
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
+export async function POST(req) {
   try {
     const body = await req.json();
-    const paymentId = body?.data?.id || body?.resource;
+    let paymentId = null;
+
+    if (body.type === "payment" && body.data?.id) {
+      paymentId = body.data.id;
+    } else {
+      return NextResponse.json({
+        status: "ignored",
+        reason: "Invalid webhook",
+      });
+    }
 
     const signature = req.headers.get("x-signature");
-    const requestId = req.headers.get("x-request-id"); // llega en todos los webhooks
+    const requestId = req.headers.get("x-request-id");
     if (!signature || !requestId) {
       return new NextResponse("Bad signature", { status: 401 });
     }
 
-    const isWebhookV1Payment =
-      body?.api_version === "v1" &&
-      body.type === "payment" &&
-      typeof body.action === "string";
+    const isPaymentWebhook =
+      ["v1", "v2"].includes(body?.api_version) &&
+      body?.type === "payment" &&
+      typeof body?.action === "string";
 
-    if (!isWebhookV1Payment) {
-      console.warn("ignored");
+    if (!isPaymentWebhook) {
+      console.warn("⚠️ Webhook ignorado:", body.type);
       return new NextResponse("Ignored", { status: 200 });
     }
-    // Consulta a MP
+
     const paymentRes = await fetch(
       `https://api.mercadopago.com/v1/payments/${paymentId}`,
       {
@@ -49,11 +58,24 @@ export async function POST(req) {
       name: "Sin nombre",
       whatsapp: "",
       address: "",
+      email: "",
     };
 
     const total = payment.transaction_amount;
     const payment_method = payment.payment_method_id;
-    const payerEmail = payment.payer?.email || clientInfo.name;
+    const payerEmail = payment.payer?.email || clientInfo.email;
+
+    // Check if sale already exists
+    const { data: existingSale } = await supabase
+      .from("sales")
+      .select("id")
+      .eq("mercadopago_id", paymentId)
+      .maybeSingle();
+
+    if (existingSale) {
+      console.log("🛑 Sale already processed:", paymentId);
+      return NextResponse.json({ status: "already_processed" });
+    }
 
     // 1. Insertar orden
     const { data: order, error: orderError } = await supabase
