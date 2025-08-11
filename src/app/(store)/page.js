@@ -13,7 +13,7 @@ export default async function Home() {
   if (error)
     return (
       <main>
-        <div>Error al cargar productos</div>;
+        <div>Error al cargar productos</div>
       </main>
     );
   const products = groupProducts(data);
