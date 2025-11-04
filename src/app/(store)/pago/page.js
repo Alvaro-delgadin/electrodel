@@ -233,7 +233,7 @@ export default function CheckoutPage() {
                   width={100}
                   height={50}
                   alt="Mercado Pago Logo"
-                  src="https://pbmvrjvjhablmelovyoc.supabase.co/storage/v1/object/public/assets//mp%20logo.webp"
+                  src="https://xubpgfhalwywsuxasqlm.supabase.co/storage/v1/object/public/assets/mp%20logo.webp"
                 />
               )}
             </Button>
