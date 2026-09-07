@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import Status from "@/components/admin/Status";
 import Image from "next/image";
-import { Skeleton, Box, Button, Switch } from "@mui/material";
+import { Skeleton, Box, Button, Switch, IconButton } from "@mui/material";
+import { Cancel, Upload } from "@mui/icons-material";
 
 export default function Settings() {
   const [sync, setSync] = useState(false);
@@ -17,10 +18,12 @@ export default function Settings() {
   const [schedule, setSchedule] = useState("");
   const [faqs, setFaqs] = useState([]);
   const [banner, setBanner] = useState({ active: false, message: "" });
+  const [bannerImage, setBannerImage] = useState({ active: false, images: [] });
 
   const [data, setData] = useState(undefined);
   const rowId = "45645c26-d123-42a1-aa25-9d5a0bf52f33";
   const dataUpdatingRef = useRef(false);
+  const bannerImageInputRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,6 +40,7 @@ export default function Settings() {
         setSchedule(data.schedule);
         setFaqs(data.faqs || []);
         setBanner(data.banner || { active: false, message: "" });
+        setBannerImage(data.banner_image || { active: false, images: [] });
 
         setLoading(false);
       } else {
@@ -87,7 +91,7 @@ export default function Settings() {
       updates.faqs = newFaqs;
     }
 
-    // Banner
+    // Banner (texto)
     if (
       "banner" in updatedFields
         ? JSON.stringify(data.banner || {}) !==
@@ -95,6 +99,16 @@ export default function Settings() {
         : JSON.stringify(data.banner || {}) !== JSON.stringify(banner)
     ) {
       updates.banner = updatedFields.banner ?? banner;
+    }
+
+    // Banner (imagen)
+    if (
+      "bannerImage" in updatedFields
+        ? JSON.stringify(data.banner_image || {}) !==
+          JSON.stringify(updatedFields.bannerImage)
+        : JSON.stringify(data.banner_image || {}) !== JSON.stringify(bannerImage)
+    ) {
+      updates.banner_image = updatedFields.bannerImage ?? bannerImage;
     }
 
     // Subida de logo
@@ -155,6 +169,73 @@ export default function Settings() {
     } else {
       setError("Solo se permiten imágenes");
     }
+  };
+
+  // Abre el selector de archivos para agregar (index undefined) o reemplazar
+  // (index puntual) una imagen del banner de imagen.
+  const handleBannerImageClick = (index) => {
+    if (bannerImageInputRef.current) {
+      bannerImageInputRef.current.dataset.index =
+        index === undefined ? "" : index;
+      bannerImageInputRef.current.click();
+    }
+  };
+
+  const handleBannerImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("Solo se permiten imágenes");
+      e.target.value = "";
+      return;
+    }
+
+    const indexAttr = bannerImageInputRef.current?.dataset.index;
+    const index =
+      indexAttr !== "" && indexAttr !== undefined
+        ? parseInt(indexAttr, 10)
+        : null;
+    e.target.value = "";
+
+    setSync("Subiendo imagen del banner");
+
+    const fileExt = file.name.split(".").pop();
+    const fileName = `banner_${Date.now()}.${fileExt}`;
+    const filePath = `banners/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("assets")
+      .upload(filePath, file);
+
+    if (uploadError) {
+      setSync(false);
+      setError("Error al subir la imagen: " + uploadError.code);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from("assets")
+      .getPublicUrl(filePath);
+    const publicUrl = urlData.publicUrl;
+
+    const updatedImages = [...bannerImage.images];
+    if (index !== null && index < updatedImages.length) {
+      updatedImages[index] = publicUrl;
+    } else {
+      updatedImages.push(publicUrl);
+    }
+
+    const updated = { ...bannerImage, images: updatedImages };
+    setBannerImage(updated);
+    await handleSubmit({ bannerImage: updated });
+  };
+
+  const handleDeleteBannerImage = async (e, index) => {
+    e.stopPropagation();
+    const updatedImages = bannerImage.images.filter((_, i) => i !== index);
+    const updated = { ...bannerImage, images: updatedImages };
+    setBannerImage(updated);
+    await handleSubmit({ bannerImage: updated });
   };
 
   return (
@@ -270,7 +351,7 @@ export default function Settings() {
           disabled={loading}
         />
       )}
-      <h2 className={styles.inputTitle}>Banner promocional</h2>
+      <h2 className={styles.inputTitle}>Banner (Texto)</h2>
       {loading ? (
         <Skeleton
           variant="rounded"
@@ -322,6 +403,110 @@ export default function Settings() {
           />
         </Box>
       )}
+      <h2 className={styles.inputTitle}>Banner (Imagen)</h2>
+      {loading ? (
+        <Skeleton
+          variant="rounded"
+          sx={{ width: "20rem", height: "3rem", borderRadius: "0.5rem" }}
+        />
+      ) : (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "1rem",
+            bgcolor: "#303030",
+            borderRadius: "0.5rem",
+            p: "1rem",
+            maxWidth: "30rem",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            <span>Mostrar banner:</span>
+            <Switch
+              checked={bannerImage.active}
+              value={bannerImage.active}
+              onChange={(e) => {
+                const updated = { ...bannerImage, active: e.target.checked };
+                setBannerImage(updated);
+                handleSubmit({ bannerImage: updated });
+              }}
+              color="primary"
+            />
+          </Box>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
+            {(bannerImage.images.length > 0
+              ? bannerImage.images
+              : [null]
+            ).map((img, index) => (
+              <Box key={index} sx={{ position: "relative", width: "8rem" }}>
+                {img && (
+                  <IconButton
+                    size="small"
+                    onClick={(e) => handleDeleteBannerImage(e, index)}
+                    sx={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      zIndex: 2,
+                      bgcolor: "red",
+                      "&:hover": { bgcolor: "red" },
+                    }}
+                  >
+                    <Cancel fontSize="small" />
+                  </IconButton>
+                )}
+                <Box
+                  onClick={() => handleBannerImageClick(img ? index : undefined)}
+                  sx={{
+                    width: "100%",
+                    aspectRatio: "1 / 1",
+                    border: "2px dashed #666",
+                    borderRadius: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    overflow: "hidden",
+                    bgcolor: "var(--background)",
+                    "&:hover": { borderColor: "#aaa" },
+                  }}
+                >
+                  {img ? (
+                    <Image
+                      src={img}
+                      alt={`banner-imagen-${index}`}
+                      width={128}
+                      height={128}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <Upload fontSize="large" />
+                  )}
+                </Box>
+              </Box>
+            ))}
+          </Box>
+          <button
+            onClick={() => handleBannerImageClick(undefined)}
+            className={styles.uploadBtn}
+            style={{ width: "100%", maxWidth: "unset", marginTop: 0 }}
+          >
+            + Agregar imagen
+          </button>
+        </Box>
+      )}
+      <input
+        type="file"
+        accept="image/*"
+        ref={bannerImageInputRef}
+        onChange={handleBannerImageChange}
+        style={{ display: "none" }}
+      />
       <h2 className={styles.inputTitle}>Preguntas Frecuentes</h2>
       {loading ? (
         <Skeleton
