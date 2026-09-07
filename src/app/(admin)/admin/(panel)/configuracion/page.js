@@ -25,6 +25,10 @@ export default function Settings() {
   const dataUpdatingRef = useRef(false);
   const bannerImageInputRef = useRef(null);
 
+  const [locations, setLocations] = useState([]);
+  const [newLocationName, setNewLocationName] = useState("");
+  const [locationsLoading, setLocationsLoading] = useState(true);
+
   useEffect(() => {
     const fetchData = async () => {
       const { data, error } = await supabase
@@ -49,6 +53,19 @@ export default function Settings() {
     };
 
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchLocations = async () => {
+      const { data, error } = await supabase
+        .from("locations")
+        .select("*")
+        .order("name", { ascending: true });
+      if (!error) setLocations(data || []);
+      setLocationsLoading(false);
+    };
+
+    fetchLocations();
   }, []);
 
   useEffect(() => {
@@ -236,6 +253,64 @@ export default function Settings() {
     const updated = { ...bannerImage, images: updatedImages };
     setBannerImage(updated);
     await handleSubmit({ bannerImage: updated });
+  };
+
+  const handleAddLocation = async () => {
+    const name = newLocationName.trim();
+    if (!name) return;
+    setSync("Agregando zona");
+    const { data: inserted, error } = await supabase
+      .from("locations")
+      .insert([{ name, active: true }])
+      .select();
+
+    if (error) {
+      setSync(false);
+      setError("Error al agregar zona: " + error.code);
+      return;
+    }
+
+    setLocations((prev) =>
+      [...prev, inserted[0]].sort((a, b) => a.name.localeCompare(b.name))
+    );
+    setNewLocationName("");
+    setSync(false);
+  };
+
+  const handleToggleLocationActive = async (loc) => {
+    setSync("Actualizando zona");
+    const { error } = await supabase
+      .from("locations")
+      .update({ active: !loc.active })
+      .eq("id", loc.id);
+
+    if (error) {
+      setSync(false);
+      setError("Error al actualizar zona: " + error.code);
+      return;
+    }
+
+    setLocations((prev) =>
+      prev.map((l) => (l.id === loc.id ? { ...l, active: !l.active } : l))
+    );
+    setSync(false);
+  };
+
+  const handleDeleteLocation = async (loc) => {
+    setSync("Eliminando zona");
+    const { error } = await supabase
+      .from("locations")
+      .delete()
+      .eq("id", loc.id);
+
+    if (error) {
+      setSync(false);
+      setError("Error al eliminar zona: " + error.code);
+      return;
+    }
+
+    setLocations((prev) => prev.filter((l) => l.id !== loc.id));
+    setSync(false);
   };
 
   return (
@@ -507,6 +582,84 @@ export default function Settings() {
         onChange={handleBannerImageChange}
         style={{ display: "none" }}
       />
+      <h2 className={styles.inputTitle}>Zonas de entrega</h2>
+      {locationsLoading ? (
+        <Skeleton
+          variant="rounded"
+          sx={{
+            width: "20rem",
+            height: "3rem",
+            borderRadius: "0.5rem",
+          }}
+        />
+      ) : (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.5rem",
+            bgcolor: "#303030",
+            borderRadius: "0.5rem",
+            p: "1rem",
+            maxWidth: "30rem",
+          }}
+        >
+          {locations.map((loc) => (
+            <Box
+              key={loc.id}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                border: "1px solid #555",
+                borderRadius: "0.5rem",
+                p: "0.3rem 0.3rem 0.3rem 1rem",
+              }}
+            >
+              <span style={{ opacity: loc.active ? 1 : 0.5 }}>
+                {loc.name}
+              </span>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Switch
+                  checked={loc.active}
+                  onChange={() => handleToggleLocationActive(loc)}
+                  color="primary"
+                  size="small"
+                />
+                <Button
+                  onClick={() => handleDeleteLocation(loc)}
+                  sx={{
+                    color: "#ec1000",
+                    textTransform: "unset",
+                    p: "0rem 0.5rem",
+                    "&:hover": { backgroundColor: "#ec3237" },
+                  }}
+                >
+                  Eliminar
+                </Button>
+              </Box>
+            </Box>
+          ))}
+          <input
+            placeholder="Nueva zona (ej. Esquel)"
+            type="text"
+            value={newLocationName}
+            onChange={(e) => setNewLocationName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleAddLocation();
+            }}
+            className={styles.inputText}
+            style={{ backgroundColor: "var(--background)", marginTop: "0.5rem" }}
+          />
+          <button
+            onClick={handleAddLocation}
+            className={styles.uploadBtn}
+            style={{ width: "100%", maxWidth: "unset", marginTop: 0 }}
+          >
+            + Agregar zona
+          </button>
+        </Box>
+      )}
       <h2 className={styles.inputTitle}>Preguntas Frecuentes</h2>
       {loading ? (
         <Skeleton
