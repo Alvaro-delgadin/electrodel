@@ -64,7 +64,7 @@ export default async function ClientLayout({ children }) {
       <ThemeRegistry>
         <ClarityTracker />
         <Header logo={brand?.logo} products={products} />
-        <LocationSelector locations={locations || []} />
+
         {brand?.banner?.active ? (
           <Banner message={brand?.banner?.message} />
         ) : (
@@ -75,6 +75,7 @@ export default async function ClientLayout({ children }) {
         ) : (
           ""
         )}
+        <LocationSelector locations={locations || []} />
         {children}
         <WhatsApp whatsapp={brand?.whatsapp} />
         <Footer
