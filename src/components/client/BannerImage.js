@@ -1,14 +1,43 @@
+"use client";
 import { Box } from "@mui/material";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
-// Muestra las imágenes cuadradas del banner promocional.
-// En PC se muestran hasta 2 imágenes en fila (lado a lado).
-// En mobile se muestra solo la primera imagen, a ancho completo.
+const ROTATE_INTERVAL_MS = 5000;
+const FADE_MS = 800;
+
+const chunkPairs = (arr, size) => {
+  const result = [];
+  for (let i = 0; i < arr.length; i += size) {
+    result.push(arr.slice(i, i + size));
+  }
+  return result;
+};
+
+// Muestra las imágenes cuadradas del banner promocional, con
+// rotación automática y fade cruzado cada 5s cuando hay más de
+// una imagen/par para mostrar.
+//
+// - Desktop: se agrupan de a pares fijos (1-2, luego 3-4, etc.)
+//   y esos pares van rotando.
+// - Mobile: se muestra 1 imagen a la vez, rotando entre todas
+//   las imágenes cargadas (no solo la primera de cada par).
 export default function BannerImage({ images = [] }) {
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const interval = setInterval(() => {
+      setTick((t) => t + 1);
+    }, ROTATE_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [images.length]);
+
   if (!images.length) return null;
 
-  const desktopImages = images.slice(0, 2);
-  const mobileImage = images[0];
+  const pairs = chunkPairs(images, 2);
+  const activePairIndex = tick % pairs.length;
+  const activeImageIndex = tick % images.length;
 
   return (
     <Box
@@ -17,50 +46,76 @@ export default function BannerImage({ images = [] }) {
         p: { xs: "0.5rem", sm: "1rem" },
       }}
     >
-      {/* Versión mobile: 1 sola imagen */}
+      {/* Versión mobile: 1 imagen a la vez, rotando entre todas */}
       <Box
         sx={{
           display: { xs: "block", sm: "none" },
+          position: "relative",
           width: "100%",
           aspectRatio: "1 / 1",
           borderRadius: 2,
           overflow: "hidden",
-          position: "relative",
         }}
       >
-        <Image
-          src={mobileImage}
-          alt="Banner promocional"
-          fill
-          style={{ objectFit: "cover" }}
-        />
-      </Box>
-
-      {/* Versión desktop: hasta 2 imágenes en fila */}
-      <Box
-        sx={{
-          display: { xs: "none", sm: "flex" },
-          gap: "1rem",
-          width: "100%",
-        }}
-      >
-        {desktopImages.map((img, index) => (
+        {images.map((img, index) => (
           <Box
-            key={index}
+            key={img + index}
             sx={{
-              flex: 1,
-              aspectRatio: "1 / 1",
-              borderRadius: 2,
-              overflow: "hidden",
-              position: "relative",
+              position: "absolute",
+              inset: 0,
+              opacity: index === activeImageIndex ? 1 : 0,
+              transition: `opacity ${FADE_MS}ms ease-in-out`,
             }}
           >
             <Image
               src={img}
-              alt={`Banner promocional ${index + 1}`}
+              alt="Banner promocional"
               fill
               style={{ objectFit: "cover" }}
             />
+          </Box>
+        ))}
+      </Box>
+
+      {/* Versión desktop: pares fijos de 2 imágenes, rotando */}
+      <Box
+        sx={{
+          display: { xs: "none", sm: "block" },
+          position: "relative",
+          width: "100%",
+          aspectRatio: "2 / 1",
+        }}
+      >
+        {pairs.map((pair, pairIndex) => (
+          <Box
+            key={pairIndex}
+            sx={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              gap: "1rem",
+              opacity: pairIndex === activePairIndex ? 1 : 0,
+              transition: `opacity ${FADE_MS}ms ease-in-out`,
+            }}
+          >
+            {pair.map((img, index) => (
+              <Box
+                key={img + index}
+                sx={{
+                  position: "relative",
+                  flex: 1,
+                  borderRadius: 2,
+                  overflow: "hidden",
+                }}
+              >
+                <Image
+                  src={img}
+                  alt={`Banner promocional ${index + 1}`}
+                  fill
+                  style={{ objectFit: "cover" }}
+                />
+              </Box>
+            ))}
           </Box>
         ))}
       </Box>
