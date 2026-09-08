@@ -11,12 +11,14 @@ import {
   Typography,
   Grid,
   IconButton,
+  Chip,
 } from "@mui/material";
 import CustomToolbar from "@/components/admin/productsToolbar.js";
 import { Save, Cancel, Upload, Close, ContentCopy } from "@mui/icons-material";
 import ImageIcon from "@mui/icons-material/Image";
 import { createActions } from "@/lib/crud/crud";
 import categories from "@/lib/productsCategories";
+import LocationsEditCell from "@/components/admin/LocationsEditCell";
 import Image from "next/image";
 
 export default function ProductsTable() {
@@ -30,6 +32,7 @@ export default function ProductsTable() {
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedRowModal, setSelectedRowModal] = useState(null);
   const fileInputRef = useRef(null);
+  const [locationOptions, setLocationOptions] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,6 +49,19 @@ export default function ProductsTable() {
     };
 
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchLocations = async () => {
+      const { data, error } = await supabase
+        .from("locations")
+        .select("name")
+        .eq("active", true)
+        .order("name", { ascending: true });
+      if (!error) setLocationOptions((data || []).map((loc) => loc.name));
+    };
+
+    fetchLocations();
   }, []);
 
   const columns = [
@@ -294,6 +310,40 @@ export default function ProductsTable() {
       editable: true,
       sortable: true,
       filterable: true,
+    },
+    {
+      field: "locations",
+      headerName: "Zonas de entrega",
+      default: [],
+      nullable: true,
+      editable: true,
+      sortable: false,
+      filterable: false,
+      width: 260,
+      renderCell: (params) => {
+        const locs = params.value || [];
+        return (
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "0.3rem",
+              alignItems: "center",
+              height: "100%",
+              py: "0.5rem",
+            }}
+          >
+            {locs.length ? (
+              locs.map((loc) => <Chip key={loc} label={loc} size="small" />)
+            ) : (
+              <span style={{ opacity: 0.6 }}>Todas las zonas</span>
+            )}
+          </Box>
+        );
+      },
+      renderEditCell: (params) => (
+        <LocationsEditCell {...params} options={locationOptions} />
+      ),
     },
     {
       field: "created_at",

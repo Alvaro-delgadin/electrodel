@@ -6,6 +6,8 @@ import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { createClient } from "@/lib/supabaseServer";
 import WhatsApp from "@/components/client/Whatsapp";
 import Banner from "@/components/client/Banner";
+import BannerImage from "@/components/client/BannerImage";
+import LocationSelector from "@/components/client/LocationSelector";
 import ClarityTracker from "@/components/client/ClaritytTacker";
 export const metadata = {
   title: "Electricidad e Iluminación | Electrodel",
@@ -51,13 +53,25 @@ export default async function ClientLayout({ children }) {
     .select("*")
     .eq("active", true);
 
+  const { data: locations } = await supabase
+    .from("locations")
+    .select("id, name")
+    .eq("active", true)
+    .order("name", { ascending: true });
+
   return (
     <AppRouterCacheProvider>
       <ThemeRegistry>
         <ClarityTracker />
         <Header logo={brand?.logo} products={products} />
+        <LocationSelector locations={locations || []} />
         {brand?.banner?.active ? (
           <Banner message={brand?.banner?.message} />
+        ) : (
+          ""
+        )}
+        {brand?.banner_image?.active ? (
+          <BannerImage images={brand?.banner_image?.images} />
         ) : (
           ""
         )}
