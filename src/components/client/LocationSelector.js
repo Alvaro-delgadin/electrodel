@@ -76,7 +76,7 @@ export default function LocationSelector({ locations = [] }) {
       >
         <Box
           sx={{
-            bgcolor: "var(--background)",
+            bgcolor: "var(--bg)",
             borderRadius: 2,
             p: 3,
             maxWidth: "24rem",
@@ -102,11 +102,7 @@ export default function LocationSelector({ locations = [] }) {
             ))}
           </List>
           {location && (
-            <Button
-              fullWidth
-              onClick={() => setOpen(false)}
-              sx={{ mt: 1 }}
-            >
+            <Button fullWidth onClick={() => setOpen(false)} sx={{ mt: 1 }}>
               Cerrar
             </Button>
           )}
