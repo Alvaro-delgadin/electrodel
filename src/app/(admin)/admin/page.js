@@ -16,17 +16,17 @@ export default function Admin() {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === "SIGNED_IN" && session?.user) {
-          const role = session.user.user_metadata?.role;
+          const role = session.user.app_metadata?.role;
           if (role === "admin" || role === "dev") {
             router.push("/admin/resumen");
           } else {
             alert(
-              "No estás autorizado para ingresar al panel de administración."
+              "No estás autorizado para ingresar al panel de administración.",
             );
             await supabase.auth.signOut();
           }
         }
-      }
+      },
     );
 
     return () => {
