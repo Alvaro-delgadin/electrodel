@@ -61,8 +61,6 @@ export default function BannerImage({ images = [] }) {
             sx={{
               position: "absolute",
               inset: 0,
-              display: "flex",
-              justifyContent: "center",
               opacity: index === activeImageIndex ? 1 : 0,
               transition: `opacity ${FADE_MS}ms ease-in-out`,
             }}
@@ -70,6 +68,7 @@ export default function BannerImage({ images = [] }) {
             <Box
               sx={{
                 position: "relative",
+                width: "100%",
                 height: "100%",
                 borderRadius: 2,
                 overflow: "hidden",
@@ -78,10 +77,8 @@ export default function BannerImage({ images = [] }) {
               <Image
                 src={img}
                 alt="Banner promocional"
-                width={0}
-                height={0}
-                sizes="100vw"
-                style={{ height: "100%", width: "auto" }}
+                fill
+                style={{ objectFit: "contain" }}
               />
             </Box>
           </Box>
