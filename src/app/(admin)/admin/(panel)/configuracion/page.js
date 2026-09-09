@@ -123,7 +123,8 @@ export default function Settings() {
       "bannerImage" in updatedFields
         ? JSON.stringify(data.banner_image || {}) !==
           JSON.stringify(updatedFields.bannerImage)
-        : JSON.stringify(data.banner_image || {}) !== JSON.stringify(bannerImage)
+        : JSON.stringify(data.banner_image || {}) !==
+          JSON.stringify(bannerImage)
     ) {
       updates.banner_image = updatedFields.bannerImage ?? bannerImage;
     }
@@ -249,10 +250,18 @@ export default function Settings() {
 
   const handleDeleteBannerImage = async (e, index) => {
     e.stopPropagation();
+    const imageUrl = bannerImage.images[index];
     const updatedImages = bannerImage.images.filter((_, i) => i !== index);
     const updated = { ...bannerImage, images: updatedImages };
     setBannerImage(updated);
     await handleSubmit({ bannerImage: updated });
+    // Borrar el archivo del bucket también
+    if (imageUrl) {
+      const path = imageUrl.split("/assets/")[1]; // extrae "banners/banner_xxx.png"
+      if (path) {
+        await supabase.storage.from("assets").remove([path]);
+      }
+    }
   };
 
   const handleAddLocation = async () => {
@@ -271,7 +280,7 @@ export default function Settings() {
     }
 
     setLocations((prev) =>
-      [...prev, inserted[0]].sort((a, b) => a.name.localeCompare(b.name))
+      [...prev, inserted[0]].sort((a, b) => a.name.localeCompare(b.name)),
     );
     setNewLocationName("");
     setSync(false);
@@ -291,7 +300,7 @@ export default function Settings() {
     }
 
     setLocations((prev) =>
-      prev.map((l) => (l.id === loc.id ? { ...l, active: !l.active } : l))
+      prev.map((l) => (l.id === loc.id ? { ...l, active: !l.active } : l)),
     );
     setSync(false);
   };
@@ -510,61 +519,62 @@ export default function Settings() {
             />
           </Box>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-            {(bannerImage.images.length > 0
-              ? bannerImage.images
-              : [null]
-            ).map((img, index) => (
-              <Box key={index} sx={{ position: "relative", width: "8rem" }}>
-                {img && (
-                  <IconButton
-                    size="small"
-                    onClick={(e) => handleDeleteBannerImage(e, index)}
+            {(bannerImage.images.length > 0 ? bannerImage.images : [null]).map(
+              (img, index) => (
+                <Box key={index} sx={{ position: "relative", width: "8rem" }}>
+                  {img && (
+                    <IconButton
+                      size="small"
+                      onClick={(e) => handleDeleteBannerImage(e, index)}
+                      sx={{
+                        position: "absolute",
+                        top: 4,
+                        right: 4,
+                        zIndex: 2,
+                        bgcolor: "red",
+                        "&:hover": { bgcolor: "red" },
+                      }}
+                    >
+                      <Cancel fontSize="small" />
+                    </IconButton>
+                  )}
+                  <Box
+                    onClick={() =>
+                      handleBannerImageClick(img ? index : undefined)
+                    }
                     sx={{
-                      position: "absolute",
-                      top: 4,
-                      right: 4,
-                      zIndex: 2,
-                      bgcolor: "red",
-                      "&:hover": { bgcolor: "red" },
+                      width: "100%",
+                      aspectRatio: "1 / 1",
+                      border: "2px dashed #666",
+                      borderRadius: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      overflow: "hidden",
+                      bgcolor: "var(--background)",
+                      "&:hover": { borderColor: "#aaa" },
                     }}
                   >
-                    <Cancel fontSize="small" />
-                  </IconButton>
-                )}
-                <Box
-                  onClick={() => handleBannerImageClick(img ? index : undefined)}
-                  sx={{
-                    width: "100%",
-                    aspectRatio: "1 / 1",
-                    border: "2px dashed #666",
-                    borderRadius: 2,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    overflow: "hidden",
-                    bgcolor: "var(--background)",
-                    "&:hover": { borderColor: "#aaa" },
-                  }}
-                >
-                  {img ? (
-                    <Image
-                      src={img}
-                      alt={`banner-imagen-${index}`}
-                      width={128}
-                      height={128}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  ) : (
-                    <Upload fontSize="large" />
-                  )}
+                    {img ? (
+                      <Image
+                        src={img}
+                        alt={`banner-imagen-${index}`}
+                        width={128}
+                        height={128}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      <Upload fontSize="large" />
+                    )}
+                  </Box>
                 </Box>
-              </Box>
-            ))}
+              ),
+            )}
           </Box>
           <button
             onClick={() => handleBannerImageClick(undefined)}
@@ -616,9 +626,7 @@ export default function Settings() {
                 p: "0.3rem 0.3rem 0.3rem 1rem",
               }}
             >
-              <span style={{ opacity: loc.active ? 1 : 0.5 }}>
-                {loc.name}
-              </span>
+              <span style={{ opacity: loc.active ? 1 : 0.5 }}>{loc.name}</span>
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <Switch
                   checked={loc.active}
@@ -649,7 +657,10 @@ export default function Settings() {
               if (e.key === "Enter") handleAddLocation();
             }}
             className={styles.inputText}
-            style={{ backgroundColor: "var(--background)", marginTop: "0.5rem" }}
+            style={{
+              backgroundColor: "var(--background)",
+              marginTop: "0.5rem",
+            }}
           />
           <button
             onClick={handleAddLocation}
@@ -699,14 +710,16 @@ export default function Settings() {
                 value={faq.question}
                 onChange={(e) => {
                   const updated = faqs.map((item, i) =>
-                    i === index ? { ...item, question: e.target.value } : item
+                    i === index ? { ...item, question: e.target.value } : item,
                   );
                   setFaqs(updated);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     const updated = faqs.map((item, i) =>
-                      i === index ? { ...item, question: e.target.value } : item
+                      i === index
+                        ? { ...item, question: e.target.value }
+                        : item,
                     );
                     setFaqs(updated);
                     handleSubmit({ faqs: updated });
@@ -720,7 +733,7 @@ export default function Settings() {
                 value={faq.answer}
                 onChange={(e) => {
                   const updated = faqs.map((item, i) =>
-                    i === index ? { ...item, answer: e.target.value } : item
+                    i === index ? { ...item, answer: e.target.value } : item,
                   );
                   setFaqs(updated);
                 }}
@@ -728,7 +741,7 @@ export default function Settings() {
                   if (e.key === "Enter") {
                     e.preventDefault(); // evita salto de línea
                     const updated = faqs.map((item, i) =>
-                      i === index ? { ...item, answer: e.target.value } : item
+                      i === index ? { ...item, answer: e.target.value } : item,
                     );
                     setFaqs(updated);
                     handleSubmit({ faqs: updated });
