@@ -49,12 +49,11 @@ export default function BannerImage({ images = [] }) {
       {/* Versión mobile: 1 imagen a la vez, rotando entre todas */}
       <Box
         sx={{
-          display: { xs: "block", sm: "none" },
+          display: { xs: "flex", sm: "none" },
+          justifyContent: "center",
           position: "relative",
           width: "100%",
-          aspectRatio: "1 / 1",
-          borderRadius: 2,
-          overflow: "hidden",
+          height: "15rem",
         }}
       >
         {images.map((img, index) => (
@@ -63,16 +62,29 @@ export default function BannerImage({ images = [] }) {
             sx={{
               position: "absolute",
               inset: 0,
+              display: "flex",
+              justifyContent: "center",
               opacity: index === activeImageIndex ? 1 : 0,
               transition: `opacity ${FADE_MS}ms ease-in-out`,
             }}
           >
-            <Image
-              src={img}
-              alt="Banner promocional"
-              fill
-              style={{ objectFit: "cover" }}
-            />
+            <Box
+              sx={{
+                position: "relative",
+                height: "100%",
+                borderRadius: 2,
+                overflow: "hidden",
+              }}
+            >
+              <Image
+                src={img}
+                alt="Banner promocional"
+                width={0}
+                height={0}
+                sizes="100vw"
+                style={{ height: "100%", width: "auto" }}
+              />
+            </Box>
           </Box>
         ))}
       </Box>
@@ -83,7 +95,7 @@ export default function BannerImage({ images = [] }) {
           display: { xs: "none", sm: "block" },
           position: "relative",
           width: "100%",
-          aspectRatio: "2 / 1",
+          height: "15rem",
         }}
       >
         {pairs.map((pair, pairIndex) => (
@@ -93,6 +105,7 @@ export default function BannerImage({ images = [] }) {
               position: "absolute",
               inset: 0,
               display: "flex",
+              justifyContent: "center",
               gap: "1rem",
               opacity: pairIndex === activePairIndex ? 1 : 0,
               transition: `opacity ${FADE_MS}ms ease-in-out`,
@@ -103,7 +116,7 @@ export default function BannerImage({ images = [] }) {
                 key={img + index}
                 sx={{
                   position: "relative",
-                  flex: 1,
+                  height: "100%",
                   borderRadius: 2,
                   overflow: "hidden",
                 }}
@@ -111,8 +124,10 @@ export default function BannerImage({ images = [] }) {
                 <Image
                   src={img}
                   alt={`Banner promocional ${index + 1}`}
-                  fill
-                  style={{ objectFit: "cover" }}
+                  width={0}
+                  height={0}
+                  sizes="100vw"
+                  style={{ height: "100%", width: "auto" }}
                 />
               </Box>
             ))}
