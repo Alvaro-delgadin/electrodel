@@ -43,7 +43,6 @@ export default function BannerImage({ images = [] }) {
     <Box
       sx={{
         width: "100%",
-        p: { xs: "0.5rem", sm: "1rem" },
       }}
     >
       {/* Versión mobile: 1 imagen a la vez, rotando entre todas */}
@@ -106,7 +105,6 @@ export default function BannerImage({ images = [] }) {
               inset: 0,
               display: "flex",
               justifyContent: "center",
-              gap: "1rem",
               opacity: pairIndex === activePairIndex ? 1 : 0,
               transition: `opacity ${FADE_MS}ms ease-in-out`,
             }}
