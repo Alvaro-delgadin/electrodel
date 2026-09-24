@@ -14,9 +14,11 @@ import {
   CircularProgress,
   Alert,
   AlertTitle,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import { ShoppingCart } from "@mui/icons-material";
-import { createPreference } from "@/app/checkout/actions"; // 🚨 importá el server action
+import { createPreference } from "@/app/checkout/actions";
 import { useTransition } from "react";
 import formatPrice from "@/lib/client/formatters/formatPrice";
 import Image from "next/image";
@@ -26,6 +28,7 @@ import { useEffect, useState } from "react";
 export default function CheckoutPage() {
   const { cart } = useCartStore();
   const [isPending, startTransition] = useTransition();
+  const [isWholesale, setIsWholesale] = useState(false);
   const [form, setForm] = useState({
     name: "",
     whatsapp: "",
@@ -38,6 +41,7 @@ export default function CheckoutPage() {
     (acc, item) => acc + item.price * (1 - item.discount / 100) * item.quantity,
     0
   );
+
   useEffect(() => {
     const fetchProfile = async () => {
       const {
@@ -62,8 +66,12 @@ export default function CheckoutPage() {
 
     fetchProfile();
   }, []);
-  const isFormComplete =
-    form.name && form.whatsapp.length > 6 && form.address && form.email;
+
+  // Minorista: todos los campos. Mayorista: nombre, whatsapp y dirección (email opcional)
+  const isFormComplete = isWholesale
+    ? form.name && form.whatsapp.length > 6 && form.address
+    : form.name && form.whatsapp.length > 6 && form.address && form.email;
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "whatsapp") {
@@ -77,7 +85,22 @@ export default function CheckoutPage() {
   const handleRealPayment = () => {
     startTransition(async () => {
       const url = await createPreference(cart, form);
-      window.location.href = url; // redirige a Mercado Pago
+      window.location.href = url;
+    });
+  };
+
+  // Paso 1: solo UI. El envío real del pedido mayorista va en el siguiente paso.
+  const handleWholesaleOrder = () => {
+    startTransition(async () => {
+      // Placeholder: más adelante crea orders + order_items en el servidor
+      console.log("Pedido mayorista (pendiente de implementar backend):", {
+        form,
+        cart,
+        total,
+      });
+      alert(
+        "Pedido mayorista: la interfaz ya está lista. El registro en el servidor se implementa en el próximo paso."
+      );
     });
   };
 
@@ -159,6 +182,7 @@ export default function CheckoutPage() {
           <Typography variant="h6" sx={{ mt: 2 }}>
             Total: ${formatPrice(total)}
           </Typography>
+
           <Typography
             variant="h4"
             fontSize="1.5rem"
@@ -169,12 +193,36 @@ export default function CheckoutPage() {
           </Typography>
 
           <Box sx={{ display: "flex", gap: 4, mt: 3, flexDirection: "column" }}>
+            {/* Opción mayorista arriba de todo el formulario */}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={isWholesale}
+                  onChange={(e) => setIsWholesale(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label="Soy mayorista (pedido sin pago online)"
+            />
+
+            {isWholesale && (
+              <Alert severity="info" variant="outlined">
+                Te contactaremos para coordinar el pago. Completá los datos a
+                nombre de quién es el pedido.
+              </Alert>
+            )}
+
             <TextField
-              label="Nombre"
+              label={isWholesale ? "A nombre de" : "Nombre"}
               name="name"
               value={form.name}
               onChange={handleChange}
               required
+              helperText={
+                isWholesale
+                  ? "Nombre o razón social del mayorista"
+                  : undefined
+              }
             />
             <TextField
               label="WhatsApp"
@@ -202,41 +250,77 @@ export default function CheckoutPage() {
               name="email"
               value={form.email}
               onChange={handleChange}
-              required
+              required={!isWholesale}
+              helperText={
+                isWholesale ? "Opcional para pedidos mayoristas" : undefined
+              }
             />
 
-            <Typography
-              variant="h4"
-              fontSize="1.5rem"
-              sx={{ mt: "3rem" }}
-              gutterBottom
-            >
-              Pagar con:
-            </Typography>
-            <Button
-              onClick={() => handleRealPayment(form)}
-              variant="contained"
-              sx={{
-                color: "white",
-                fontSize: "1.2rem",
-                border: "#1a78c2 2px solid",
-                bgcolor: "white",
-                p: "1rem 2rem",
-              }}
-              disabled={!isFormComplete || isPending}
-            >
-              {isPending ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : (
-                <Image
-                  style={{ height: "2rem", width: "auto" }}
-                  width={100}
-                  height={50}
-                  alt="Mercado Pago Logo"
-                  src="https://xubpgfhalwywsuxasqlm.supabase.co/storage/v1/object/public/assets/mp%20logo.webp"
-                />
-              )}
-            </Button>
+            {isWholesale ? (
+              <>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mt: 1 }}
+                >
+                  No se procesa pago online. El pedido quedará registrado para
+                  coordinación comercial.
+                </Typography>
+                <Button
+                  onClick={handleWholesaleOrder}
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    color: "white",
+                    fontSize: "1.1rem",
+                    p: "1rem 2rem",
+                    textTransform: "none",
+                  }}
+                  disabled={!isFormComplete || isPending}
+                >
+                  {isPending ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    "Enviar pedido"
+                  )}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Typography
+                  variant="h4"
+                  fontSize="1.5rem"
+                  sx={{ mt: "3rem" }}
+                  gutterBottom
+                >
+                  Pagar con:
+                </Typography>
+                <Button
+                  onClick={() => handleRealPayment(form)}
+                  variant="contained"
+                  sx={{
+                    color: "white",
+                    fontSize: "1.2rem",
+                    border: "#1a78c2 2px solid",
+                    bgcolor: "white",
+                    p: "1rem 2rem",
+                  }}
+                  disabled={!isFormComplete || isPending}
+                >
+                  {isPending ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    <Image
+                      style={{ height: "2rem", width: "auto" }}
+                      width={100}
+                      height={50}
+                      alt="Mercado Pago Logo"
+                      src="https://xubpgfhalwywsuxasqlm.supabase.co/storage/v1/object/public/assets/mp%20logo.webp"
+                    />
+                  )}
+                </Button>
+              </>
+            )}
           </Box>
         </Box>
       ) : (
