@@ -90,7 +90,8 @@ export async function createWholesaleOrder(cart, clientData) {
 
     const total = cart.reduce(
       (acc, item) =>
-        acc + item.price * (1 - (item.discount || 0) / 100) * item.quantity,
+        acc +
+        item.price * (1 - (item.wholesale_discount ?? 0) / 100) * item.quantity,
       0
     );
 

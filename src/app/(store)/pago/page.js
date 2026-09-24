@@ -43,8 +43,11 @@ export default function CheckoutPage() {
   });
   const [loading, setLoading] = useState(true);
 
+  const getDiscount = (item) =>
+    isWholesale ? item.wholesale_discount ?? 0 : item.discount ?? 0;
+
   const total = cart.reduce(
-    (acc, item) => acc + item.price * (1 - item.discount / 100) * item.quantity,
+    (acc, item) => acc + item.price * (1 - getDiscount(item) / 100) * item.quantity,
     0
   );
 
@@ -176,7 +179,7 @@ export default function CheckoutPage() {
                     <Typography>
                       $
                       {formatPrice(
-                        item.price * (1 - item.discount / 100) * item.quantity
+                        item.price * (1 - getDiscount(item) / 100) * item.quantity
                       )}
                     </Typography>
                   </ListItem>
@@ -216,8 +219,9 @@ export default function CheckoutPage() {
 
             {isWholesale && (
               <Alert severity="info" variant="outlined">
-                Te contactaremos para coordinar el pago. Completá los datos a
-                nombre de quién es el pedido.
+                Precio mayorista aplicado sobre el listado. Te contactaremos
+                para coordinar el pago. Completá los datos a nombre de quién
+                es el pedido.
               </Alert>
             )}
 

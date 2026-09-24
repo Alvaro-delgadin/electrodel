@@ -152,12 +152,24 @@ export default function ProductsTable() {
     },
     {
       field: "discount",
-      headerName: "Descuento (%)",
+      headerName: "Descuento (minorista) (%)",
       type: "number",
       nullable: true,
       editable: true,
       align: "left",
       headerAlign: "left",
+    },
+    {
+      field: "wholesale_discount",
+      headerName: "Descuento (mayorista) (%)",
+      type: "number",
+      nullable: false,
+      editable: true,
+      default: 15,
+      align: "left",
+      headerAlign: "left",
+      description:
+        "Descuento aplicado sobre el precio minorista cuando el pedido es mayorista.",
     },
     {
       field: "stock",
