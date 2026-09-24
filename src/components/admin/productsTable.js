@@ -14,7 +14,14 @@ import {
   Chip,
 } from "@mui/material";
 import CustomToolbar from "@/components/admin/productsToolbar.js";
-import { Save, Cancel, Upload, Close, ContentCopy } from "@mui/icons-material";
+import {
+  Save,
+  Cancel,
+  Upload,
+  Close,
+  ContentCopy,
+  Delete,
+} from "@mui/icons-material";
 import ImageIcon from "@mui/icons-material/Image";
 import { createActions } from "@/lib/crud/crud";
 import categories from "@/lib/productsCategories";
@@ -97,6 +104,18 @@ export default function ProductsTable() {
               icon={<ContentCopy />}
               label="Duplicar"
               onClick={() => action.addRow(row)}
+            />
+          </Tooltip>,
+          <Tooltip title="Eliminar definitivamente" key={4}>
+            <GridActionsCellItem
+              icon={<Delete />}
+              label="Eliminar"
+              onClick={() => {
+                const confirmed = window.confirm(
+                  `¿Eliminar "${row.product}" de forma definitiva? Esta acción no se puede deshacer.`
+                );
+                if (confirmed) action.deleteRowPermanent(id);
+              }}
             />
           </Tooltip>,
         ];
@@ -424,7 +443,11 @@ export default function ProductsTable() {
           loading={loading}
           apiRef={apiRef}
           rowHeight={80}
-          sortModel={[{ field: "created_at", sort: "desc" }]}
+          initialState={{
+            sorting: {
+              sortModel: [{ field: "created_at", sort: "desc" }],
+            },
+          }}
           getRowClassName={(params) => {
             const classes = [];
             if (params.row.active === false) classes.push("inactiveProduct");

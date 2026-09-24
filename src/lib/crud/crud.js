@@ -171,6 +171,29 @@ export function createActions(
         requestLock.current = false;
       }
     },
+    async deleteRowPermanent(id) {
+      setError(null);
+      if (requestLock.current) return;
+      requestLock.current = true;
+      try {
+        setSync("Eliminando definitivamente");
+        const { error } = await supabase.from(table).delete().eq("id", id);
+        if (error) {
+          if (error.code === "23503") {
+            throw new Error(
+              `No se puede eliminar: este ${item} tiene pedidos o ventas asociadas. Desactivalo en su lugar.`
+            );
+          }
+          throw new Error(`Error al eliminar ${item}: ` + error.message);
+        }
+        apiRef.current.updateRows([{ id, _action: "delete" }]);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setSync(false);
+        requestLock.current = false;
+      }
+    },
     async deleteImage(event, index) {
       event.stopPropagation();
       if (requestLock.current) return;
