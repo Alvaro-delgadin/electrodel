@@ -490,6 +490,7 @@ export default function ProductsTable() {
               addRow: action.addRow,
               setRowsValue: action.setRowsValue,
               importFile: action.importFile,
+              deleteRowsPermanent: action.deleteRowsPermanent,
             },
           }}
         />

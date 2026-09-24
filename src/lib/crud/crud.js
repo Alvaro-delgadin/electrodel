@@ -194,6 +194,52 @@ export function createActions(
         requestLock.current = false;
       }
     },
+    async deleteRowsPermanent() {
+      if (!rowsSelected?.length) return;
+      if (requestLock.current) return;
+
+      const count = rowsSelected.length;
+      const confirmed = window.confirm(
+        `¿Eliminar definitivamente ${count} producto${count > 1 ? "s" : ""}? Esta acción no se puede deshacer.`
+      );
+      if (!confirmed) return;
+
+      requestLock.current = true;
+      setError(null);
+
+      try {
+        setSync("Eliminando definitivamente");
+
+        const deletes = rowsSelected.map((id) =>
+          supabase.from(table).delete().eq("id", id)
+        );
+
+        const results = await Promise.all(deletes);
+
+        const errors = results.filter((res) => res.error);
+        if (errors.length) {
+          const hasFkError = errors.some((res) => res.error?.code === "23503");
+          if (hasFkError) {
+            throw new Error(
+              `Algunos productos no se pudieron eliminar porque tienen pedidos o ventas asociadas. Desactivalos en su lugar.`
+            );
+          }
+          throw new Error(
+            `Error al eliminar algunos productos: ${errors[0].error.message}`
+          );
+        }
+
+        // Quitar de la grilla
+        rowsSelected.forEach((id) => {
+          apiRef.current.updateRows([{ id, _action: "delete" }]);
+        });
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setSync(false);
+        requestLock.current = false;
+      }
+    },
     async deleteImage(event, index) {
       event.stopPropagation();
       if (requestLock.current) return;

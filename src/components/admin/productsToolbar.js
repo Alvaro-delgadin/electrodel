@@ -35,8 +35,10 @@ import {
   FileDownload,
   Star,
   StarBorderOutlined,
+  Delete,
 } from "@mui/icons-material";
 import Status from "@/components/admin/Status";
+import exportToExcel from "@/lib/excel/export";
 
 const StyledQuickFilter = styled(QuickFilter)({
   display: "grid",
@@ -60,7 +62,6 @@ const StyledTextField = styled(TextField)(({ theme, ownerState }) => ({
   opacity: ownerState.expanded ? 1 : 0,
   transition: theme.transitions.create(["width", "opacity"]),
 }));
-import exportToExcel from "@/lib/excel/export";
 
 export default function CustomToolbar({
   loading,
@@ -72,6 +73,7 @@ export default function CustomToolbar({
   addRow,
   setRowsValue,
   importFile,
+  deleteRowsPermanent,
 }) {
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const exportMenuTriggerRef = useRef(null);
@@ -109,6 +111,16 @@ export default function CustomToolbar({
           justifyContent: "flex-end",
         }}
       >
+        {rowsSelected?.length ? (
+          <Tooltip title="Eliminar definitivamente">
+            <ToolbarButton onClick={deleteRowsPermanent} color="error">
+              <Delete fontSize="small" />
+            </ToolbarButton>
+          </Tooltip>
+        ) : (
+          ""
+        )}
+
         {rowsSelected?.length ? (
           <Tooltip title="Destacar productos">
             <ToolbarButton onClick={() => setRowsValue("featured", true)}>
