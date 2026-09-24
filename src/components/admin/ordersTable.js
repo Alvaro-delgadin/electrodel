@@ -20,6 +20,17 @@ import { Save, Cancel, Delete, MenuOpen, Storefront } from "@mui/icons-material"
 import { createActions } from "@/lib/crud/crud";
 import { isWholesaleClient, stripWholesalePrefix } from "@/lib/wholesale";
 
+function formatARS(value) {
+  const num = Number(value);
+  return isNaN(num)
+    ? value
+    : num.toLocaleString("es-AR", {
+        style: "currency",
+        currency: "ARS",
+        minimumFractionDigits: 0,
+      });
+}
+
 export default function OrdersTable() {
   const [rows, setRows] = useState([]);
   const [sync, setSync] = useState(false);
@@ -96,7 +107,9 @@ export default function OrdersTable() {
       watts,
       ampere,
       voltage,
-      product_name
+      product_name,
+      unit_price,
+      discount
   `
       )
       .eq("order_id", row.id);
@@ -203,6 +216,28 @@ export default function OrdersTable() {
       ],
     },
     {
+      field: "subtotal",
+      headerName: "Subtotal (mayorista)",
+      type: "number",
+      nullable: true,
+      editable: false,
+      headerAlign: "left",
+      align: "left",
+      description:
+        "Subtotal de productos calculado al armar el pedido mayorista (con descuento mayorista aplicado). No se edita a mano.",
+      renderCell: (params) => {
+        if (params.value === null || params.value === undefined) return "";
+        const value = Number(params.value);
+        return isNaN(value)
+          ? params.value
+          : value.toLocaleString("es-AR", {
+              style: "currency",
+              currency: "ARS",
+              minimumFractionDigits: 0,
+            });
+      },
+    },
+    {
       field: "total",
       headerName: "Envío",
       type: "number",
@@ -210,6 +245,8 @@ export default function OrdersTable() {
       editable: true,
       headerAlign: "left",
       align: "left",
+      description:
+        "Costo de envío a completar a mano. El monto de productos está en Ventas (pedidos online) o en Subtotal (pedidos mayoristas).",
       renderCell: (params) => {
         const value = Number(params.value);
         return isNaN(value)
@@ -342,40 +379,111 @@ export default function OrdersTable() {
           <Divider style={{ marginBottom: 16 }} />
 
           {!sync && orderItems.length ? (
-            <List>
-              {orderItems.map((item, index) => (
-                <ListItem key={index} divider alignItems="flex-start">
-                  <Box>
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      {item.product_name}
-                    </Typography>
-                    <Typography color="text.secondary">
-                      Cantidad: {item.quantity}
-                    </Typography>
-                    {item.color && (
-                      <Typography color="text.secondary">
-                        Color: {item.color}
-                      </Typography>
+            <>
+              <List>
+                {orderItems.map((item, index) => {
+                  const hasPricing =
+                    item.unit_price !== null && item.unit_price !== undefined;
+                  const lineTotal = hasPricing
+                    ? item.unit_price *
+                      (1 - (item.discount || 0) / 100) *
+                      item.quantity
+                    : null;
+                  return (
+                    <ListItem key={index} divider alignItems="flex-start">
+                      <Box sx={{ width: "100%" }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "flex-start",
+                            gap: 1,
+                          }}
+                        >
+                          <Typography variant="subtitle1" fontWeight="bold">
+                            {item.product_name}
+                          </Typography>
+                          {hasPricing && (
+                            <Typography
+                              variant="subtitle1"
+                              fontWeight="bold"
+                              sx={{ whiteSpace: "nowrap" }}
+                            >
+                              {formatARS(lineTotal)}
+                            </Typography>
+                          )}
+                        </Box>
+                        <Typography color="text.secondary">
+                          Cantidad: {item.quantity}
+                        </Typography>
+                        {hasPricing && (
+                          <Typography color="text.secondary">
+                            Precio unitario: {formatARS(item.unit_price)}
+                            {item.discount > 0
+                              ? ` · Descuento: ${item.discount}%`
+                              : ""}
+                          </Typography>
+                        )}
+                        {item.color && (
+                          <Typography color="text.secondary">
+                            Color: {item.color}
+                          </Typography>
+                        )}
+                        {item.ampere && (
+                          <Typography color="text.secondary">
+                            Corriente (A): {item.ampere}
+                          </Typography>
+                        )}
+                        {item.voltage && (
+                          <Typography color="text.secondary">
+                            Tensión (V): {item.voltage}
+                          </Typography>
+                        )}
+                        {item.watts && (
+                          <Typography color="text.secondary">
+                            Potencia: {item.watts}W
+                          </Typography>
+                        )}
+                      </Box>
+                    </ListItem>
+                  );
+                })}
+              </List>
+              {orderItems.every(
+                (item) => item.unit_price !== null && item.unit_price !== undefined
+              ) ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mt: 1,
+                  }}
+                >
+                  <Typography fontWeight="bold">Total productos</Typography>
+                  <Typography fontWeight="bold">
+                    {formatARS(
+                      orderItems.reduce(
+                        (acc, item) =>
+                          acc +
+                          item.unit_price *
+                            (1 - (item.discount || 0) / 100) *
+                            item.quantity,
+                        0
+                      )
                     )}
-                    {item.ampere && (
-                      <Typography color="text.secondary">
-                        Corriente (A): {item.ampere}
-                      </Typography>
-                    )}
-                    {item.voltage && (
-                      <Typography color="text.secondary">
-                        Tensión (V): {item.voltage}
-                      </Typography>
-                    )}
-                    {item.watts && (
-                      <Typography color="text.secondary">
-                        Potencia: {item.watts}W
-                      </Typography>
-                    )}
-                  </Box>
-                </ListItem>
-              ))}
-            </List>
+                  </Typography>
+                </Box>
+              ) : (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mt: 1 }}
+                >
+                  Este pedido no tiene precio guardado por ítem (es anterior a
+                  esta función).
+                </Typography>
+              )}
+            </>
           ) : (
             ""
           )}

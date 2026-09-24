@@ -120,6 +120,8 @@ export async function POST(req) {
           watts: item.watts || null,
           voltage: item.voltage || null,
           product_name: item.product,
+          unit_price: item.price,
+          discount: item.discount || 0,
         })
         .select()
         .single();

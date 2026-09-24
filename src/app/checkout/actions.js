@@ -103,7 +103,7 @@ export async function createWholesaleOrder(cart, clientData) {
       .insert({
         client: clientName,
         status: "pending",
-        total: Math.round(total),
+        subtotal: Math.round(total),
         active: true,
         whatsapp: clientData.whatsapp,
         address: clientData.address,
@@ -125,6 +125,8 @@ export async function createWholesaleOrder(cart, clientData) {
       watts: item.watts || null,
       voltage: item.voltage || null,
       product_name: item.product,
+      unit_price: item.price,
+      discount: item.wholesale_discount ?? 0,
     }));
 
     const { error: itemsError } = await supabaseAdmin
