@@ -18,17 +18,23 @@ import {
   Checkbox,
 } from "@mui/material";
 import { ShoppingCart } from "@mui/icons-material";
-import { createPreference } from "@/app/checkout/actions";
+import {
+  createPreference,
+  createWholesaleOrder,
+} from "@/app/checkout/actions";
 import { useTransition } from "react";
 import formatPrice from "@/lib/client/formatters/formatPrice";
 import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function CheckoutPage() {
   const { cart } = useCartStore();
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isWholesale, setIsWholesale] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
   const [form, setForm] = useState({
     name: "",
     whatsapp: "",
@@ -54,7 +60,7 @@ export default function CheckoutPage() {
         return;
       }
 
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("profiles")
         .select("name, whatsapp, address, email")
         .eq("id", user.id)
@@ -67,7 +73,6 @@ export default function CheckoutPage() {
     fetchProfile();
   }, []);
 
-  // Minorista: todos los campos. Mayorista: nombre, whatsapp y dirección (email opcional)
   const isFormComplete = isWholesale
     ? form.name && form.whatsapp.length > 6 && form.address
     : form.name && form.whatsapp.length > 6 && form.address && form.email;
@@ -83,24 +88,26 @@ export default function CheckoutPage() {
   };
 
   const handleRealPayment = () => {
+    setSubmitError(null);
     startTransition(async () => {
-      const url = await createPreference(cart, form);
-      window.location.href = url;
+      try {
+        const url = await createPreference(cart, form);
+        window.location.href = url;
+      } catch (err) {
+        setSubmitError("No se pudo iniciar el pago. Intentá de nuevo.");
+      }
     });
   };
 
-  // Paso 1: solo UI. El envío real del pedido mayorista va en el siguiente paso.
   const handleWholesaleOrder = () => {
+    setSubmitError(null);
     startTransition(async () => {
-      // Placeholder: más adelante crea orders + order_items en el servidor
-      console.log("Pedido mayorista (pendiente de implementar backend):", {
-        form,
-        cart,
-        total,
-      });
-      alert(
-        "Pedido mayorista: la interfaz ya está lista. El registro en el servidor se implementa en el próximo paso."
-      );
+      const result = await createWholesaleOrder(cart, form);
+      if (result.success) {
+        router.push("/pago/exito?tipo=mayorista");
+      } else {
+        setSubmitError(result.error || "No se pudo enviar el pedido.");
+      }
     });
   };
 
@@ -193,12 +200,14 @@ export default function CheckoutPage() {
           </Typography>
 
           <Box sx={{ display: "flex", gap: 4, mt: 3, flexDirection: "column" }}>
-            {/* Opción mayorista arriba de todo el formulario */}
             <FormControlLabel
               control={
                 <Checkbox
                   checked={isWholesale}
-                  onChange={(e) => setIsWholesale(e.target.checked)}
+                  onChange={(e) => {
+                    setIsWholesale(e.target.checked);
+                    setSubmitError(null);
+                  }}
                   color="primary"
                 />
               }
@@ -256,6 +265,12 @@ export default function CheckoutPage() {
               }
             />
 
+            {submitError && (
+              <Alert severity="error" variant="outlined">
+                {submitError}
+              </Alert>
+            )}
+
             {isWholesale ? (
               <>
                 <Typography
@@ -296,7 +311,7 @@ export default function CheckoutPage() {
                   Pagar con:
                 </Typography>
                 <Button
-                  onClick={() => handleRealPayment(form)}
+                  onClick={handleRealPayment}
                   variant="contained"
                   sx={{
                     color: "white",
