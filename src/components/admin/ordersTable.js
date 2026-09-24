@@ -13,10 +13,12 @@ import {
   Divider,
   Box,
   CircularProgress,
+  Chip,
 } from "@mui/material";
 import CustomToolbar from "@/components/admin/ordersToolbar.js";
-import { Save, Cancel, Delete, MenuOpen } from "@mui/icons-material";
+import { Save, Cancel, Delete, MenuOpen, Storefront } from "@mui/icons-material";
 import { createActions } from "@/lib/crud/crud";
+import { isWholesaleClient, stripWholesalePrefix } from "@/lib/wholesale";
 
 export default function OrdersTable() {
   const [rows, setRows] = useState([]);
@@ -30,6 +32,7 @@ export default function OrdersTable() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
+  const [wholesaleFilter, setWholesaleFilter] = useState("all"); // "all" | "wholesale"
 
   useEffect(() => {
     fetchOrders();
@@ -138,8 +141,34 @@ export default function OrdersTable() {
       headerName: "Cliente",
       type: "text",
       nullable: false,
-      width: 200,
+      width: 220,
       editable: true,
+      renderCell: (params) => {
+        const wholesale = isWholesaleClient(params.value);
+        return (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.75,
+              height: "100%",
+            }}
+          >
+            <span>{stripWholesalePrefix(params.value)}</span>
+            {wholesale && (
+              <Tooltip title="Pedido mayorista · sin pago online">
+                <Chip
+                  icon={<Storefront fontSize="small" />}
+                  label="Mayorista"
+                  size="small"
+                  color="secondary"
+                  variant="outlined"
+                />
+              </Tooltip>
+            )}
+          </Box>
+        );
+      },
     },
     {
       field: "created_at",
@@ -248,6 +277,14 @@ export default function OrdersTable() {
     },
   ];
 
+  const wholesaleCount = rows.filter((row) =>
+    isWholesaleClient(row.client)
+  ).length;
+  const displayedRows =
+    wholesaleFilter === "wholesale"
+      ? rows.filter((row) => isWholesaleClient(row.client))
+      : rows;
+
   const action = createActions(
     "orders",
     "pedido",
@@ -262,7 +299,7 @@ export default function OrdersTable() {
   return (
     <div className="tableContainer">
       <DataGrid
-        rows={rows}
+        rows={displayedRows}
         apiRef={apiRef}
         columns={columns}
         loading={loading}
@@ -290,6 +327,9 @@ export default function OrdersTable() {
             sync,
             error,
             addRow: action.addRow,
+            wholesaleFilter,
+            onWholesaleFilterChange: setWholesaleFilter,
+            wholesaleCount,
           },
         }}
       />

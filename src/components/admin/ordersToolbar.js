@@ -22,6 +22,8 @@ import {
   Menu,
   Badge,
   Box,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
 import {
   Search,
@@ -30,6 +32,7 @@ import {
   ViewColumn,
   FilterList,
   FileDownload,
+  Storefront,
 } from "@mui/icons-material";
 import Status from "@/components/admin/Status";
 
@@ -56,7 +59,15 @@ const StyledTextField = styled(TextField)(({ theme, ownerState }) => ({
   transition: theme.transitions.create(["width", "opacity"]),
 }));
 
-export default function CustomToolbar({ loading, sync, error, addRow }) {
+export default function CustomToolbar({
+  loading,
+  sync,
+  error,
+  addRow,
+  wholesaleFilter,
+  onWholesaleFilterChange,
+  wholesaleCount,
+}) {
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const exportMenuTriggerRef = useRef(null);
 
@@ -90,6 +101,37 @@ export default function CustomToolbar({ loading, sync, error, addRow }) {
           justifyContent: "flex-end",
         }}
       >
+        <ToggleButtonGroup
+          value={wholesaleFilter}
+          exclusive
+          size="small"
+          onChange={(event, value) => {
+            // exclusive: value es null si se vuelve a clickear la opción activa
+            if (value) onWholesaleFilterChange(value);
+          }}
+          sx={{ mx: 0.5 }}
+        >
+          <ToggleButton value="all">Todos</ToggleButton>
+          <ToggleButton value="wholesale">
+            <Storefront fontSize="small" sx={{ mr: 0.5 }} />
+            Solo mayoristas
+            {wholesaleCount > 0 && (
+              <Badge
+                badgeContent={wholesaleCount}
+                color="primary"
+                sx={{ ml: 1.5 }}
+              />
+            )}
+          </ToggleButton>
+        </ToggleButtonGroup>
+
+        <Divider
+          orientation="vertical"
+          variant="medio"
+          flexItem
+          sx={{ mx: 0.5 }}
+        />
+
         <Tooltip title="Añadir pedido">
           <ToolbarButton onClick={addRow}>
             <Add fontSize="small" />
