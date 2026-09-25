@@ -112,7 +112,7 @@ export default function ProductsTable() {
               label="Eliminar"
               onClick={() => {
                 const confirmed = window.confirm(
-                  `¿Eliminar "${row.product}" de forma definitiva? Esta acción no se puede deshacer.`
+                  `¿Eliminar "${row.product}" de forma definitiva? Esta acción no se puede deshacer.`,
                 );
                 if (confirmed) action.deleteRowPermanent(id);
               }}
@@ -158,6 +158,7 @@ export default function ProductsTable() {
       editable: true,
       align: "left",
       headerAlign: "left",
+      width: 300,
     },
     {
       field: "wholesale_discount",
@@ -167,6 +168,7 @@ export default function ProductsTable() {
       editable: true,
       default: 15,
       align: "left",
+      width: 300,
       headerAlign: "left",
       description:
         "Descuento aplicado sobre el precio minorista cuando el pedido es mayorista.",
@@ -407,7 +409,7 @@ export default function ProductsTable() {
     rowsSelected,
     selectedRowModal,
     setSelectedRowModal,
-    categories
+    categories,
   );
 
   const handleOpenImageModal = (row) => {
@@ -479,7 +481,7 @@ export default function ProductsTable() {
           isRowSelectable={(params) => !params.row.isNew}
           onRowSelectionModelChange={(newSelection) => {
             setRowsSelected(
-              newSelection?.ids ? Array.from(newSelection.ids) : []
+              newSelection?.ids ? Array.from(newSelection.ids) : [],
             );
           }}
           slots={{
