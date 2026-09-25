@@ -217,14 +217,14 @@ export default function OrdersTable() {
     },
     {
       field: "subtotal",
-      headerName: "Subtotal (mayorista)",
+      headerName: "Subtotal",
       type: "number",
       nullable: true,
       editable: false,
       headerAlign: "left",
       align: "left",
       description:
-        "Subtotal de productos calculado al armar el pedido mayorista (con descuento mayorista aplicado). No se edita a mano.",
+        "Subtotal de productos (con descuentos ya aplicados). No se edita a mano: se calcula al crear el pedido.",
       renderCell: (params) => {
         if (params.value === null || params.value === undefined) return "";
         const value = Number(params.value);
@@ -246,7 +246,7 @@ export default function OrdersTable() {
       headerAlign: "left",
       align: "left",
       description:
-        "Costo de envío a completar a mano. El monto de productos está en Ventas (pedidos online) o en Subtotal (pedidos mayoristas).",
+        "Costo de envío a completar a mano. El monto de productos está en la columna Subtotal.",
       renderCell: (params) => {
         const value = Number(params.value);
         return isNaN(value)

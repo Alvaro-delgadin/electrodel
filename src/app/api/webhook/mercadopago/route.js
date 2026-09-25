@@ -97,7 +97,8 @@ export async function POST(req) {
       .insert({
         client: clientInfo.name,
         status: "pending",
-        total: null, // Se puede completar luego en el panel
+        subtotal: total,
+        total: null, // Envío, se puede completar luego en el panel
         active: true,
         whatsapp: clientInfo.whatsapp,
         address: clientInfo.address,
