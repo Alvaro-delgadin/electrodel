@@ -158,7 +158,7 @@ export default function ProductsTable() {
       editable: true,
       align: "left",
       headerAlign: "left",
-      width: 250,
+      width: 220,
     },
     {
       field: "wholesale_discount",
@@ -168,7 +168,7 @@ export default function ProductsTable() {
       editable: true,
       default: 15,
       align: "left",
-      width: 250,
+      width: 220,
       headerAlign: "left",
       description:
         "Descuento aplicado sobre el precio minorista cuando el pedido es mayorista.",
